@@ -1,4 +1,35 @@
 {
-    "customFolding.endFoldingMarker": "// > }",
-    "customFolding.startFoldingMarker": "// < {"
+        "terminal.integrated.fontFamily": "'CodeNewRoman Nerd Font', monospace",
+        "terminal.integrated.fontSize": 12,
+        "terminal.integrated.inheritEnv": true,
+        "git.enableSmartCommit": true,
+        "git.confirmSync": false,
+        "git.autofetch": true,
+        "terminal.integrated.defaultProfile.windows": "Git Bash",
+        "security.workspace.trust.enabled": false,
+        "security.allowedUNCHosts": [
+                "*"
+        ],
+        "javascript.validate.enable": false,
+        "files.associations": {
+                "*.sh": "javascript" // or whatever your file extension is
+        },
+        "editor.folding": true,
+        "editor.foldingHighlight": true,
+        "editor.showFoldingControls": "always", // or "mouseover",
+        "editor.guides.indentation": true,
+        "editor.guides.bracketPairs": "active",
+        "editor.renderWhitespace": "all",
+        "editor.renderControlCharacters": true,
+        "editor.unicodeHighlight.ambiguousCharacters": true,
+        "editor.tabSize": 8, // Change to your preferred number, e.g., 2, 8
+        //"editor.insertSpaces": false,  // Ensures actual tab characters are used
+        "editor.detectIndentation": false,
+        "editor.cursorStyle": "block",
+        "editor.overtypeCursorStyle": "block-outline", // Prevents VS Code from auto-overriding your settings
+        "workbench.colorCustomizations": {
+                "editorCursor.foreground": "#FF8800", // orange cursor
+                "editorWhitespace.foreground": "#996633", // dark orange tabs and spaces
+        },
+        "editor.mouseWheelZoom": true,
 }
