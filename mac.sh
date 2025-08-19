@@ -20,7 +20,7 @@ Send Control character using: Control
 Send Alt characer using: Command because Command in on normal position for Alt on windows keyboard
 Send Windows logo key using Command (right) checkbox is selected
 
-Now in karabiner we confifure two more rules:
+Now in karabiner we configure two more rules:
 In Citrix send Tab with Fn so that Citrix doesn't block it
 In Citrix send right Command on left Option (Win key) - this will work since Citix expects right ctrl as Win key (check above)
 
