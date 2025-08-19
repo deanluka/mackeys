@@ -1,6 +1,6 @@
 {
         "terminal.integrated.fontFamily": "'CodeNewRoman Nerd Font', monospace",
-        "terminal.integrated.fontSize": 12,
+        "terminal.integrated.fontSize": 15,
         "terminal.integrated.inheritEnv": true,
         "git.enableSmartCommit": true,
         "git.confirmSync": false,

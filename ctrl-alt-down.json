@@ -1,0 +1,30 @@
+{
+    "title": "In Citrix, add fn modifier to down so it is forwarded",
+    "rules": [
+        {
+            "description": "In Citrix, add fn modifier to down so it is forwarded",
+            "manipulators": [
+                {
+                    "from": {
+                        "key_code": "down",
+                        "modifiers": { "optional": [ "any" ] }
+                    },
+                    "to": {
+                        "key_code": "down",
+                        "modifiers": [ "fn" ]
+                    },
+                    "type": "basic",
+                    "conditions": [
+                        {
+                            "type": "frontmost_application_if",
+                            "bundle_identifiers": [
+                                "^com\\.citrix\\.XenAppViewer$",
+                                "^com\\.citrix\\.receiver\\.icaviewer\\.mac$"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
