@@ -22,7 +22,7 @@ git show HEAD				Same
 git show commit-id			Show any commit
 git show --word-diff			Show last commit with word-diff instead of line-diff
  
-work_dir/your_files	index/stage		HEAD/local_repo_copy		remote_HEAD/origin/remote_repo
+work_dir/your_files	index/stage		HEAD/local_repo		remote_HEAD/origin/remote_repo
     --------- add --------->										
     ------ git diff  ------>										
 			    -------- commit --------->							
