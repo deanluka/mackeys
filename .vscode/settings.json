@@ -23,7 +23,7 @@
         "editor.renderControlCharacters": true,
         "editor.unicodeHighlight.ambiguousCharacters": true,
         "editor.tabSize": 8, // Change to your preferred number, e.g., 2, 8
-        //"editor.insertSpaces": false,  // Ensures actual tab characters are used
+        "editor.insertSpaces": false,  // Ensures actual tab characters are used
         "editor.detectIndentation": false,
         "editor.cursorStyle": "block",
         "editor.overtypeCursorStyle": "block-outline", // Prevents VS Code from auto-overriding your settings
