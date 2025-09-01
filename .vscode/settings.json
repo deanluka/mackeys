@@ -32,4 +32,9 @@
                 "editorWhitespace.foreground": "#996633", // dark orange tabs and spaces
         },
         "editor.mouseWheelZoom": true,
+	"editor.quickSuggestions": {
+	    "other": false,
+	    "comments": false,
+	    "strings": false,
+	},
 }

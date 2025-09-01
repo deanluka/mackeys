@@ -22,9 +22,8 @@ git show HEAD				Same
 git show commit-id			Show any commit
 git show --word-diff			Show last commit with word-diff instead of line-diff
  
-working_dir		index//stage		HEAD/local_repo		origin/local copy	remote_HEAD
- our_files		staging area		HEAD/local_repo		  of remote repo	remote_repo
-
+working_dir		index/stage		   HEAD			origin/main		remote_HEAD
+ our_files		staging area		local_repo	  local copy of remote repo	remote_repo
     --------- add --------->
     ------ git diff  ------>
 			    -------- commit --------->
@@ -37,11 +36,13 @@ working_dir		index//stage		HEAD/local_repo		origin/local copy	remote_HEAD
     --------------------------- git diff origin --------------------------->
 }
 how to see remote changes before we pull them {
+- As we can see from above there is no git diff command that can see changes on remote repo
+- This is where fetch comes in - fetch will copy changes from remote repo to origin - local copy of remote repo
 git fetch
 git diff HEAD origin
 git log origin/main		-> all comits on origin
 git log HEAD..origin/main	-> only commits not yet applied
-- git pull = git fetch + git merge - git fetch updates local repo copy, doesn;t touch working dir
+git pull = git fetch + git merge - git fetch updates local origin copy, doesn;t touch working dir or local HEAD 
 }
 how to see last commit - git show
 how to show any commit - git show commit_id
