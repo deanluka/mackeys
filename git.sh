@@ -22,17 +22,19 @@ git show HEAD				Same
 git show commit-id			Show any commit
 git show --word-diff			Show last commit with word-diff instead of line-diff
  
-work_dir/your_files	index/stage		HEAD/local_repo_copy		remote_HEAD/origin/remote_repo
-    --------- add --------->										
-    ------ git diff  ------>										
-			    -------- commit --------->							
-			    --- git diff --cached --->							
-    ----------------- git diff HEAD ----------------->							
-						     ------------- push -------------->			
-						     <------------ fetch --------------		
-						     --- git diff HEAD origin/main --->			
-    <------------------------------------- pull ---------------------------------------			
-    ------------------------------ git diff origin/main ------------------------------>			
+working_dir		index//stage		HEAD/local_repo		origin/local copy	remote_HEAD
+ our_files		staging area		HEAD/local_repo		  of remote repo	remote_repo
+
+    --------- add --------->
+    ------ git diff  ------>
+			    -------- commit --------->
+			    --- git diff --cached --->
+    ----------------- git diff HEAD ----------------->
+						     -------------------- push --------------------->
+									   <-------- fetch ----------
+						     -git diff HEAD origin->
+    <-------------------------------------------- pull ----------------------------------------------
+    --------------------------- git diff origin --------------------------->
 }
 how to see remote changes before we pull them {
 git fetch
