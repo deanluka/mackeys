@@ -16,7 +16,7 @@ Follow me reader!
 ## Mac OS configuration
 
 Here we describe configuration of Mac OS. We are not in Citrix RDP or in Microsoft Demote Desktop or in Windows. Plain Mac. So you are proud new owner of MacBook, you love your new toy, everything is fine, everything works, life has a meaning. It is little funny that Copy, Paste, Find, ... are actually Cmd-C and Cmd-V Cmd-F instead of Ctrl-C Ctrl-V Ctrl-F, but you get used to it. After all, Cmd key is closer so it is easier to type combos - no little finger gymnastics. You are thinking about switching Control and Command but then you would have to switch it back in Terminal where Ctrl-C still has a meaning of interrupt of execution or you would have to fix Alt-Tab which would now be Ctrl-Tab so you just keep everything as is.
-Problems really start when you connect external keyboard. First thing you notice is that Mac key is not really Alt - it is more like Windows key on a wrong position. 
+Problems really start when you connect external keyboard. First thing you notice is that Mac key is not really Alt - it is more like Windows key on a wrong position. Oh nooooo, why Apple, why?
 
 
 ## Citrix configuration
