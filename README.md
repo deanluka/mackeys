@@ -10,7 +10,7 @@ Macbook is terrific piece of hardware with great shiny bright retina screen with
 
 For 1. and 2. we just learn to live with it. With 3. 4. and 5. we will deal in the rest of this document. 3. 4. and 5. will also be a problem if you install Windows on Mac laptop (which we did) and we will describe how to fix it on Mac and Windows OS for both internal and external keyboard.
 
-Follow me reader.
+Follow me reader!
 
 
 ## Mac OS configuration
@@ -20,7 +20,7 @@ Here we describe configuration of Mac OS. We are not in Citrix RDP or in Microso
 
 ## Citrix configuration
 
-Citrix is very tricky to configure for everything to work fine in Windows RDP session. Citrix likes to block some keys and key combos. I was searching for years for good setup that would enable Alt-Tab and Alt-Shift-Down for multi-cursor in Notepad++ or VSCode and I think i found it. Still up to today I didn't find a way to get Ctrl-Alt-Down to get through so I reconfigured VSCode to use Alt-Shift-Down - same as Notepad++.
+Citrix is very tricky to configure for everything to work fine in Windows RDP session. Citrix likes to block some keys and key combos. I was searching for years for good setup that would enable Alt-Tab and Alt-Shift-Down for multi-cursor in Notepad++ or VSCode and I think i found it. Still up to today I didn't find a way to get Ctrl-Alt-Down to get through so I reconfigured VSCode to use Alt-Shift-Down instead - same as Notepad++.
 
 
 ## Microsoft Remote Desktop configuration
