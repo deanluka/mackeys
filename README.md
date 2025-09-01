@@ -25,7 +25,7 @@ Citrix is very tricky to configure for everything to work fine in Windows RDP se
 
 ## Microsoft Remote Desktop configuration
 
-Configuring Citrix RDP will not fix keys in Microsoft Remote Desktop.
+Configuring Citrix RDP will not fix keys in Microsoft Remote Desktop. We will fix them.
 
 
 ## Microsoft Windows configuration
