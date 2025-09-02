@@ -30,9 +30,11 @@ Problems really start when you connect external keyboard. First thing you notice
 
 Alas, worry not my brother, we are here to help and wrong every right or make every right wrong, or ... where was I ... :)
 
-So, after connecting external windows keyboard you notice that Mac internal keyboard has key order (we will talk in windows terms) Control Alt Windows so your favorite shortcuts were not Alt-Tab, Alt-C, Alt-V, Alt-F but Win-Tab, Win-C/V/F and accordingly on external keyboard they will not work with third key - (Control Windows) Alt - but with second - Windows, which is not how it is intended to be. To fix it and keep your finger motorics the only logical thing to do is remap Alt and Win only for external keyboard without changing internal keyboard setup.
+So, after connecting external windows keyboard you notice that Mac internal keyboard has key order (we will talk in windows terms) Control Alt Windows while external keyboards have order Control Windows Alt so your favorite shortcuts were not Alt-Tab, Alt-C, Alt-V, Alt-F but Win-Tab, Win-C/V/F and accordingly on external keyboard they will not work with third key Alt - but with second - Windows, which is not how god intended it to be. To fix this and keep your finger motorics same on both keyboards the only logical thing to do is switch Win and Alt keys on external keyboard.
 
-Apple -> System Preferences -> Keyboard -> Modifier keys - make sure you select your USB keyboard and not Apple Internal Keyboard/Trackpad!
+### Switching Win and Alt on external keyboard
+
+Apple Menu -> System Preferences -> Keyboard -> Modifier keys -> select your USB keyboard
 - Option \ key sends % Command
 - Command % key sends \ Option
 
