@@ -1,7 +1,5 @@
 # Mac keys configuration
 
-![Mac](./mac.jpg)
-
 Macbook is a terrific piece of hardware with great, shiny, bright retina screen with resolution of whooping 2880x1800 (3k), soft, large keyboard (before notorious butterfly) and sturdy design. He is common guest in every second Hollywood movie, actually if you ever see a laptop in a movie, chances are it will probably be Mac. He is a true star. Still there are few things that will annoy every user that was not born with silver spoon (ups. I mean Mac) and has gotten used to windows before or has to connect to windows every now and then using his precious Mac:
 
 1. Applications are not closing when you close all windows
@@ -12,6 +10,8 @@ Macbook is a terrific piece of hardware with great, shiny, bright retina screen 
 
 Notable mentions - Home, End,  PageUp, PageDown and Delete are also not there but can be emulated with Fn + cursor keys and Fn + backspace.
 
+![Mac](./mac.jpg)
+
 For 1. and 2. we just learn to live with it. With 3. 4. and 5. we will deal in the rest of this document. 
 
 If you install Windows on Mac laptop, 1. and 2. wil be solved, but 3. 4. and 5. will still be a problem and we will describe how to fix it on both, internal and external keyboard.
@@ -19,7 +19,6 @@ If you install Windows on Mac laptop, 1. and 2. wil be solved, but 3. 4. and 5. 
 Now you must be thinking - Yeah right, you will solve Insert and PrintScreen by using external keyboard. No, we will achieve Insert and PrintScreen keys even on internal keyboard without external keyboard connected on both Mac and Windows OS.
 
 Wanna see how? Follow me reader!
-
 
 ## Mac OS configuration
 
@@ -51,4 +50,4 @@ Configuring Citrix RDP will not fix keys in Microsoft Remote Desktop. We will fi
 
 ## Microsoft Windows configuration
 
-If you by any change manage to install Windows on Macbook here you can see how to configure keys to make your life easier or just worth living.
+If you by any chance manage to install Windows on Macbook here you can see how to configure keys to make your life easier or just worth living.
