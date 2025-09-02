@@ -1,6 +1,6 @@
 # Mac keys configuration
 
-!(./mac.jpg)
+![Mac](./mac.jpg)
 
 Macbook is terrific piece of hardware with great shiny bright retina screen with resolution of up to 2880x1800 pixels, soft large keyboard (before notorious butterfly keyboard of course) and sturdy design. Still there are few things that will annoy every user that was not born with silver spoon  (ups. I mean Mac) and has got used to windows before or has to connect to windows every now and then using his precious Mac:
 
