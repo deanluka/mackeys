@@ -34,11 +34,15 @@ So, after connecting external windows keyboard you notice that Mac internal keyb
 
 ### Switching Win and Alt on external keyboard
 
-Apple Menu -> System Preferences -> Keyboard -> Modifier keys -> select your USB keyboard
+Apple Menu -> System Preferences -> Keyboard -> Modifier Keys -> Select your USB keyboard
 - Option \ key sends % Command
 - Command % key sends \ Option
 
 ![Alt-Win](./alt-win.jpg)
+
+Now, that will "fix" issue 3. - Alt and Win keys are switched. Actually we didn't even fix it, internal keyboard still has Win and Alt switched, and now external also, but at least they are both wrong in same way so familiar shortcuts like Alt-Tab, Alt-X/C/V/F will work "same" on both keyboards.
+
+Regarding missing Insert and PrintScreen keys I used to live with that for years and solution is so easy. These keys are not needed on Mac OS because Mac doesn't even know what to do with them, but they are necessary in remote desktop to windows where they are used for Copy Paste (Ctrl Insert, Shift Insert) and PrintScreen is used for screen capture.
 
 ## Citrix configuration
 
