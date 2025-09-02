@@ -1,15 +1,16 @@
-{
-        "terminal.integrated.fontFamily": "'CodeNewRoman Nerd Font', monospace",
-        "terminal.integrated.fontSize": 15,
+{	// user settings - go to users json
         "terminal.integrated.inheritEnv": true,
-        "git.enableSmartCommit": true,
-        "git.confirmSync": false,
-        "git.autofetch": true,
-        "terminal.integrated.defaultProfile.windows": "Git Bash",
         "security.workspace.trust.enabled": false,
         "security.allowedUNCHosts": [
                 "*"
         ],
+	// workspace setgings - saved with repo
+        "terminal.integrated.fontFamily": "'CodeNewRoman Nerd Font', monospace",
+        "terminal.integrated.fontSize": 12,
+        "git.enableSmartCommit": true,
+        "git.confirmSync": false,
+        "git.autofetch": true,
+        "terminal.integrated.defaultProfile.windows": "Git Bash",
         "javascript.validate.enable": false,
         "files.associations": {
                 "*.sh": "javascript" // or whatever your file extension is
