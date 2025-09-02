@@ -27,6 +27,8 @@ Here we describe keys configuration of Mac OS. We are not in Citrix RDP or in Mi
 
 Problems really start when you connect external keyboard. First thing you notice is that Mac or Command key is not really Alt! It is more like Windows key on a wrong position. Oh noooooooo! Why Apple, why? Why couldn't you go to poor neighbor that doesn't have money for expensive stuff, so only has PC and see how his keyboard looks like. How could you change ten hardware architectures, from 6502 to Motorola 68000 to PowerC to Intel and finally ARM, and OS from Apple DOS to MacOS to NeXTSTEP to Darwin with Mach 3 kernel but keyboard keys could not be set straight through all this time? Don't you feel suffering and sorrow of your fellow users. Don't you care about your users. Don't you hear the trumpets calling in the distance...
 
+![Apple II](./apple2.jpg) ![Macintosh](./macintosh.jpg) ![Mext](./next.jpg)
+
 Alas, worry not my brother, we are here to help and wrong every right or make every right wrong, or ... where was I ... :)
 
 So, after connecting external windows keyboard you notice that Mac internal keyboard has key order (we will talk in windows terms) Control Alt Windows so your favorite shortcuts were not Alt-Tab, Alt-C, Alt-V, Alt-F but Win-Tab, Win-C/V/F and accordingly on external keyboard they will not work with third key - (Control Windows) Alt - but with second - Windows, which is not how it is intended to be. To fix it and keep your finger motorics the only logical thing to do is remap Alt and Win only for external keyboard without changing internal keyboard setup.
