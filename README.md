@@ -2,17 +2,23 @@
 
 ![Mac](./mac.jpg)
 
-Macbook is terrific piece of hardware with great shiny bright retina screen with resolution of up to 2880x1800 pixels, soft large keyboard (before notorious butterfly keyboard of course) and sturdy design. Still there are few things that will annoy every user that was not born with silver spoon  (ups. I mean Mac) and has got used to windows before or has to connect to windows every now and then using his precious Mac:
+Macbook is terrific piece of hardware with great shiny bright retina screen with resolution of whooping 2880x1800 (3k), soft large keyboard (before notorious butterfly) and sturdy design. He is common guest in every second Hollywood movie, actually if you ever see a laptop in a movie chances are it will probably be Mac. He is a true star. Still there are few things that will annoy every user that was not born with silver spoon (ups. I mean Mac) and has gotten used to windows before or has to connect to windows every now and then using his precious Mac:
 
 1. Applications are not closing when you close all windows
 2. Alt-Tab will not bring up minimized applications
-3. Alt and Windows keys are switched compared to normal keyboard
+3. Alt and Windows keys are switched
 4. There is no Insert key
 5. There is no PrintScreen key
 
-For 1. and 2. we just learn to live with it. With 3. 4. and 5. we will deal in the rest of this document. 3. 4. and 5. will also be a problem if you install Windows on Mac laptop (which we did) and we will describe how to fix it on Mac and Windows OS for both internal and external keyboard.
+Notable mentions - Home, End,  Page Up, Page Down and Delete are also not there but can be emulated with Fn + cursor keys and Fn + backspace.
 
-Follow me reader!
+For 1. and 2. we just learn to live with it. With 3. 4. and 5. we will deal in the rest of this document. 
+
+If you install Windows on Mac laptop 1. and 2. wil be solved. 3. 4. and 5. will still be a problem and we will describe how to fix it on both internal and external keyboard.
+
+Now you must be thinking - Yeah right, you will solve Insert and PrintScreen by using external keyboard. No we will achieve Insert and PrintScreen keys even on internal keyboard without external keyboard connected.
+
+Wanna see how? Follow me reader!
 
 
 ## Mac OS configuration
