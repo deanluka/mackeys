@@ -32,7 +32,8 @@ Alas, worry not my brother, we are here to help and wrong every right or make ev
 
 So, after connecting external windows keyboard you notice that Mac internal keyboard has key order (we will talk in windows terms) **Control Alt Windows** while external keyboards have order **Control Windows Alt** so your favorite shortcuts were not Alt-Tab, Alt-C, Alt-V, Alt-F but Win-Tab, Win-C/V/F and accordingly on external keyboard they will not work with third key - Alt - but with second - Windows, which is not how it was intended to be. To fix it and keep your fingers motorics same on both keyboards the only logical thing to do is to switch Win and Alt keys on external keyboard.
 
-![ctrl-win-alt](./ctrl-win-alt.jpg) Ctrl-Win-Alt vs Ctrl-Alt-Win ![ctrl-alt-win](./ctrl-alt-win.jpg)
+Ctrl-Alt-Win vs Ctrl-Win-Alt
+![ctrl-alt-win](./ctrl-alt-win.jpg) ![ctrl-win-alt](./ctrl-win-alt.jpg)
 
 ### Switching Win and Alt on external keyboard
 
