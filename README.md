@@ -52,7 +52,7 @@ So, how to create those keys on internal Macbook keyboard. It cannot be done wit
 
 ### Adding Insert and PrintScreen to internal keyboard
 
-
+![insert_printscreen](./insert_printscreen.jpg)
 
 ## Citrix configuration
 
