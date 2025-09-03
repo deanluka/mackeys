@@ -34,8 +34,7 @@ Alas, worry not my brother, we are here to help and wrong every right or make ev
 
 So, after connecting external windows keyboard you notice that Mac internal keyboard has key order (we will talk in windows terms) **Control Alt Windows** while external keyboards have order **Control Windows Alt** so your favorite shortcuts were not Alt-Tab, Alt-C, Alt-V, Alt-F but Win-Tab, Win-C/V/F and accordingly on external keyboard they will not work with third key - Alt - but with second - Windows, which is not how we got used to. To fix it and keep your fingers motorics same on both keyboards the only logical thing to do is to switch Win and Alt keys on external keyboard.
 
-Ctrl-Alt-Win vs Ctrl-Win-Alt:
-
+Ctrl-Alt-Win vs Ctrl-Win-Alt:  
 ![ctrl-alt-win](./ctrl-alt-win.jpg) &nbsp; &nbsp; &nbsp; ![ctrl-win-alt](./ctrl-win-alt.jpg)
 
 ### Switching Win and Alt on external keyboard
@@ -49,7 +48,7 @@ Apple Menu -> System Preferences -> Keyboard -> Modifier Keys -> Select your USB
 
 That will "fix" issue 3. - Alt and Win keys are switched. Actually we didn't even fix it, internal keyboard still has Win and Alt switched, and now external also, but at least they are both wrong in same way so familiar shortcuts like Alt-Tab, Alt-X/C/V/F will work "same" on both keyboards. Two wrongs make one right.
 
-Regarding missing Insert and PrintScreen keys I used to live with that for years and solution is so easy. These keys are not needed on Mac OS because Mac doesn't even know what to do with them, but you will miss them in remote desktop where they are used for Copy Paste (Ctrl-Insert, Shift-Insert) and PrintScreen is used for screen capture. Also they are not missing on external keyboard, they are missing only on internal keyboard. 
+Regarding missing Insert and PrintScreen keys I used to live with that for years and solution is so easy. These keys are not needed on Mac OS because Mac doesn't even know what to do with them, but you will miss them in remote desktop where they are used for Copy Paste (Ctrl-Insert, Shift-Insert) in Linux terminal where for obvious reasons you can't use Ctrl-C Ctrl-V and PrintScreen is used for screen capture when you want to document something like in this document. Also they are not missing on external keyboard, they are missing only on internal keyboard. 
 
 So, how to create those keys on internal Macbook keyboard. It cannot be done with tools included with Mac OS. We will have to use Karabiner Elements simple bindings which map keys one to one. One physical key will  always be mapped to another. We only have to find some unused keys on internal keyboard. Our choice and probably only choice are two keys on the right of space - Right Command and Right Option. They are really never used, not needed and anyone can live without them. I came to this idea by looking at my Lenovo ThinkPad which has PrintScreen at exactly same place - on the right of space, between Right Alt and Right Control. Somehow all other laptop producers (except Apple) concluded that out of three ancient keys on top - PrintScreen/SysRq, Scroll Lock and Pause/Break - you can safely eliminate two - Scroll Lock and Break - no one will miss them, but you have to keep Print Screen.
 
@@ -64,8 +63,40 @@ In Preferences select Simple modifications and Add items:
 
 ## Citrix configuration
 
-Citrix is very tricky to configure everything to work fine in Windows RDP session. Citrix likes to block some keys and key combos. I was searching for years for good setup that would enable Alt-Tab and Alt-Shift-Down for multi-cursor in Notepad++ or VSCode and I think i found it. Still up to today I didn't find a way to get Ctrl-Alt-Down to get through so I reconfigured VSCode to use Alt-Shift-Down instead - same as Notepad++.
+Citrix is very tricky to configure everything to work fine in Windows RDP session. Citrix likes to block some keys and key combos. I was searching for years for good setup that would enable Alt-Tab with real Alt - one next to Space and Alt-Shift-Down for multi-cursor in Notepad++ or VSCode and I finally found it on some page on Internet. Still up to now I didn't find a way to get Ctrl-Alt-Down to get through Citrix so I reconfigured VSCode to use Alt-Shift-Down for multi cursor instead - same as Notepad++.
 
+If you remember from previous chapter and those are the settings that we start from on Mac internal keyboard we have (in the order of keys on keyboard):
+Ctrl sends Ctrl
+Left Option sends Alt
+Left Command sends Windows
+
+External keyboard is changed in Karabiner:
+Ctrl sends Ctrl
+Win send Option because this is Option position on Mac
+Alt sends Command because this is normal position for Command key on Mac
+
+So after mapping on both internal and external keyboard order of keys is:
+Ctrl
+Option Alt
+Command Win
+
+Now mapping in citrix is:
+Send Control character using: ^ Control
+Send Alt character using: X Command (left) because Command in on normal position for Alt on windows keyboard
+Send Windows logo key using X Command (right) checkbox is selected
+
+Now in karabiner we configure two more rules:
+In Citrix send Tab with Fn so that Citrix doesn't block it
+In Citrix send right Command on left Option (Win key) - this will work since Citix expects right ctrl as Win key (check above)
+
+Additionally in RDP left alt and left win are switched on all keyboards.
+
+Karabiner files are in /Users/dean/.config/karabiner/assets/complex_modifications:
+
+citrix.json - Ctrl, Windows, Alt order (normal windows order - we use this one)
+citrix2.json - Ctrl, Alt, Windows order (Mac order - not used)
+ctrl-alt-down.json - tried to make ctrl-alt-down work in citrix by adding fn modifier but it doesn't work
+swap_alt_cmd_rdp.json - Swap left alt and left win for RDP
 
 ## Microsoft Remote Desktop configuration
 
