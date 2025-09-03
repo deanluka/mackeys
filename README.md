@@ -44,13 +44,15 @@ Apple Menu -> System Preferences -> Keyboard -> Modifier Keys -> Select your USB
 
 ![Alt-Win](./alt-win.jpg)
 
-Now, that will "fix" issue 3. - Alt and Win keys are switched. Actually we didn't even fix it, internal keyboard still has Win and Alt switched, and now external also, but at least they are both wrong in same way so familiar shortcuts like Alt-Tab, Alt-X/C/V/F will work "same" on both keyboards. Two wrongs make one right.
+That will "fix" issue 3. - Alt and Win keys are switched. Actually we didn't even fix it, internal keyboard still has Win and Alt switched, and now external also, but at least they are both wrong in same way so familiar shortcuts like Alt-Tab, Alt-X/C/V/F will work "same" on both keyboards. Two wrongs make one right.
 
 Regarding missing Insert and PrintScreen keys I used to live with that for years and solution is so easy. These keys are not needed on Mac OS because Mac doesn't even know what to do with them, but you will miss them in remote desktop where they are used for Copy Paste (Ctrl-Insert, Shift-Insert) and PrintScreen is used for screen capture. Also they are not missing on external keyboard, they are missing only on internal keyboard. 
 
 So, how to create those keys on internal Macbook keyboard. It cannot be done with tools included with Mac OS. We will have to use Karabiner Elements simple bindings which map keys one to one. One physical key will  always be mapped to another. We only have to find some unused keys on internal keyboard. Our choice and probably only choice are two keys on the right of space - Right Command and Right Option. They are really never used, not needed and anyone can live without them. I came to this idea by looking at my Lenovo ThinkPad which has PrintScreen at exactly same place - on the right of space, between Right Alt and Right Control. Somehow all other laptop producers (except Apple) concluded that out of three ancient keys on top - PrintScreen/SysRq, Scroll Lock and Pause/Break - you can safely eliminate two - Scroll Lock and Break - no one will miss them, but you have to keep Print Screen.
 
 ### Adding Insert and PrintScreen to internal keyboard
+
+Install Karabiner-Elements -> 
 
 ![insert_printscreen](./insert_printscreen.jpg)
 
