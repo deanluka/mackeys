@@ -4,7 +4,7 @@
         "security.allowedUNCHosts": [
                 "*"
         ],
-	// workspace setgings - saved with repo
+	// workspace settings - saved with repo
         "terminal.integrated.fontFamily": "'CodeNewRoman Nerd Font', monospace",
         "terminal.integrated.fontSize": 12,
         "git.enableSmartCommit": true,

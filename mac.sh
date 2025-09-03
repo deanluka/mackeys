@@ -10,7 +10,7 @@ Ctrl sends Ctrl
 Win send Option because this is Option position on Mac
 Alt sends Command because this is normal position for Command key on Mac
 
-So after maping on both internal and external keyboard order or keys is:
+So after maping on both internal and external keyboard order of keys is:
 Ctrl
 Option Alt
 Command Win

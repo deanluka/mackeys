@@ -26,11 +26,11 @@ Here we describe keys configuration of Mac OS. We are not in Citrix RDP or in Mi
 
 Problems really start when you connect external keyboard. First thing you notice is that Mac or Command key is not really Alt! It is more like Windows key on a wrong position. Oh noooooooo! Why Apple, why? Why couldn't you go to poor neighbor that doesn't have money for expensive stuff, so only has PC and see how his keyboard looks like. How could you change ten hardware architectures, from 6502 to Motorola 68000 to PowerC to Intel and finally ARM, and OS from Apple DOS to MacOS to NeXTSTEP to Darwin with Mach 3 kernel but keyboard keys could not be set straight through all this time? Don't you feel suffering and sorrow of your fellow users. Don't you care about your users. Don't you hear the trumpets calling in the distance...
 
-![Apple II](./apple2.jpg) ![Macintosh](./macintosh.jpg) ![Mext](./next.jpg)
+![Apple II](./apple2.jpg) ![Macintosh](./macintosh.jpg) ![NEXT](./next.jpg)
 
 Alas, worry not my brother, we are here to help and wrong every right or make every right wrong, or ... where was I ... :)
 
-So, after connecting external windows keyboard you notice that Mac internal keyboard has key order (we will talk in windows terms) Control Alt Windows while external keyboards have order Control Windows Alt so your favorite shortcuts were not Alt-Tab, Alt-C, Alt-V, Alt-F but Win-Tab, Win-C/V/F and accordingly on external keyboard they will not work with third key Alt - but with second - Windows, which is not how god intended it to be. To fix this and keep your finger motorics same on both keyboards the only logical thing to do is switch Win and Alt keys on external keyboard.
+So, after connecting external windows keyboard you notice that Mac internal keyboard has key order (we will talk in windows terms) Control Alt Windows while external keyboards have order Control Windows Alt so your favorite shortcuts were not Alt-Tab, Alt-C, Alt-V, Alt-F but Win-Tab, Win-C/V/F and accordingly on external keyboard they will not work with third key - Alt - but with second - Windows, which is not how it was intended to be. To fix it and keep your fingers motorics same on both keyboards the only logical thing to do is to switch Win and Alt keys on external keyboard.
 
 ### Switching Win and Alt on external keyboard
 
@@ -40,9 +40,15 @@ Apple Menu -> System Preferences -> Keyboard -> Modifier Keys -> Select your USB
 
 ![Alt-Win](./alt-win.jpg)
 
-Now, that will "fix" issue 3. - Alt and Win keys are switched. Actually we didn't even fix it, internal keyboard still has Win and Alt switched, and now external also, but at least they are both wrong in same way so familiar shortcuts like Alt-Tab, Alt-X/C/V/F will work "same" on both keyboards.
+Now, that will "fix" issue 3. - Alt and Win keys are switched. Actually we didn't even fix it, internal keyboard still has Win and Alt switched, and now external also, but at least they are both wrong in same way so familiar shortcuts like Alt-Tab, Alt-X/C/V/F will work "same" on both keyboards. Two wrongs make one right.
 
-Regarding missing Insert and PrintScreen keys I used to live with that for years and solution is so easy. These keys are not needed on Mac OS because Mac doesn't even know what to do with them, but they are necessary in remote desktop to windows where they are used for Copy Paste (Ctrl Insert, Shift Insert) and PrintScreen is used for screen capture.
+Regarding missing Insert and PrintScreen keys I used to live with that for years and solution is so easy. These keys are not needed on Mac OS because Mac doesn't even know what to do with them, but you will miss them in remote desktop where they are used for Copy Paste (Ctrl-Insert, Shift-Insert) and PrintScreen is used for screen capture. Also they are not missing on external keyboard, they are missing only on internal keyboard. 
+
+So, how to create those keys on internal Macbook keyboard. It cannot be done with tools included with Mac OS. We will have to use Karabiner Elements simple bindings which map keys one to one. One physical key will  always be mapped to another. We only have to find some unused keys on internal keyboard. Our choice and probably only choice are two keys on the right of space - Right Command and Right Option. They are really never used, not needed and anyone can live without them. I came to this idea by looking at my Lenovo ThinkPad which has PrintScreen at exactly same place - on the right of space, between Right Alt and Right Control. Somehow all other laptop producers (except Apple) concluded that out of three ancient keys on top - PrintScreen/SysRq, Scroll Lock and Pause/Break - you can safely eliminate two - Scroll Lock and Break - no one will miss them, but you have to keep Print Screen.
+
+### Adding Insert and PrintScreen to internal keyboard
+
+
 
 ## Citrix configuration
 
