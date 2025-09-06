@@ -46,7 +46,7 @@ Apple Menu -> System Preferences -> Keyboard -> Modifier Keys -> Select your USB
 
 ![Alt-Win](./alt-win.jpg)
 
-That will "fix" issue 3. - Alt and Win keys are switched. Actually we didn't even fix it, internal keyboard still has Win and Alt switched, and now external also, but at least they are both wrong in same way so familiar shortcuts like "Alt"-Tab, "Alt"-X/C/V/F will work "same" on both keyboards. Two wrongs make one right.
+That will "fix" issue 3. - Alt and Win keys are switched. Actually we didn't even fix it, internal keyboard still has Win and Alt switched, and now external also, but at least they are both wrong in same way so familiar shortcuts like "Alt"-Tab, "Alt"-X/C/V/F will work "same" on both keyboards. Two wrongs make one right :).
 
 Regarding 4. and 5. - missing Insert and PrintScreen keys I used to live with that for years thinking "Oh, it would be so nice if I had these keys, what can you do, it's not possible...", but it is possible and solution is so easy once you get out of mind box it's not possible into mind box how can i do it. You will not need it often, but enough that you feel anxious every time you need them and they are not available. 
 
@@ -57,7 +57,7 @@ PrintScreen is used in windows for screen capture when you want to take a pictur
 1. Create PrintScreen out of thin air on internal Macbook keyboard
 2. Remap it to Command-Shift-5 which gives most versatile screenshot on Mac with choice of full screen, one window or rectangular area
 
-So, how to create keys out of thin air. It cannot be done with tools included with Mac OS. We will have to use Karabiner-Elements simple binding which maps keys one to one. One physical key will  always be mapped to another. We only have to find some unused keys on internal keyboard. Our choice and probably only choice are two keys on the right of space - Right Command and Right Option. They are really never used, not needed and anyone can live without them. I came to this idea by looking at my Lenovo ThinkPad which has PrintScreen at exactly same place - on the right of space, between Right Alt and Right Control. Somehow all other laptop producers (except Apple) concluded that out of three ancient keys on top - PrintScreen/SysRq, Scroll Lock and Pause/Break - you can safely eliminate two - Scroll Lock and Break - no one will miss them, but you have to keep Print Screen.
+So, how to create keys out of thin air. It cannot be done with tools included with Mac OS. We will have to use Karabiner-Elements simple bindings which map keys one to one. One physical key will  always be mapped to another. We only have to find some unused keys on internal keyboard. Our choice and probably only choice are two keys on the right of space - Right Command and Right Option. They are really never used, not needed and anyone can live without them. I came to this idea by looking at my Lenovo ThinkPad which has PrintScreen at exactly same place - on the right of space, between Right Alt and Right Control. Somehow all other laptop producers (except Apple) concluded that out of three ancient keys on top - PrintScreen/SysRq, Scroll Lock and Pause/Break - you can safely eliminate two - Scroll Lock and Break - no one will miss them, but you have to keep Print Screen.
 
 ### Adding Insert and PrintScreen to internal keyboard
 
@@ -74,7 +74,7 @@ Regarding mapping PrintScreen to Command-Shift-5 in Mac - that will need Karabin
 
 On another completely unrelated note, if using Ctrl-X/C/V/O/S/Z/Y/F/A for Cut/Copy/Paste/Open/Save/Undo/Redo/Find and Select All on windows and having to use Command instead on Mac is killing you, you can configure all those shortcuts without touching original ones in native Mac keyboard config. The other option is to switch completely Control and Command but we didn't chose that route.
 
-### How to map Cut/Copy/Paste/Open/Save/Undo/Redo/Find and Select All to Ctrl-X/C/V/O/S/Z/Y/F/A
+### How to map Ctrl-X/C/V/O/S/Z/Y/F/A to Cut/Copy/Paste/...
 
 Go to Apple Menu -> System Preferences -> Shortcuts -> App Shortcuts and add (+):  
 ![ctrl-shortcuts](./ctrl-shortcuts.jpg)
