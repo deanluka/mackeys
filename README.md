@@ -12,7 +12,7 @@ Macbook is a terrific piece of hardware with great, shiny, bright IPS retina scr
 **Honorable mentions:**  
 Home, End,  PageUp, PageDown and Delete are also not there but can be emulated with Fn + cursor keys and Fn + backspace.
 
-![Mac](./mac.jpg)
+![Mac](./images/mac.png)
 
 For 1. and 2. we just learn to live with it. With 3. 4. and 5. we will deal in the rest of this document. 
 
@@ -28,14 +28,14 @@ Here we describe keys configuration of Mac OS. We are not in Citrix RDP or in Mi
 
 Problems really start when you connect external keyboard. First thing you notice is that Mac or Command key is not really Alt! It is more like Windows key on a wrong position. Oh noooooooo! Why Apple, why? Why couldn't you go to poor neighbor next door that doesn't have money for expensive stuff, so only has PC and see how his keyboard looks like. How could you change ten hardware architectures, from 6502 to Motorola 68000 to PowerC to Intel and finally ARM, and OS from Apple DOS to MacOS to NeXTSTEP to Darwin with Mach 3 BSD kernel but keyboard keys could not be set straight through all this time? Don't you feel suffering and sorrow of your fellow users. Don't you care about your users. Don't you hear the trumpets calling in the distance... :)
 
-![Apple II](./apple2.jpg) ![Macintosh](./macintosh.jpg) ![NeXT](./next.jpg)
+![Apple II](./images/apple2.png) ![Macintosh](./images/macintosh.png) ![NeXT](./images/next.png)
 
 Alas, worry not my brother, we are here to help and wrong every right or make every right wrong, or ... where was I ... :)
 
 So, after connecting external windows keyboard you notice that Mac internal keyboard has key order (we will talk in windows terms) **Control Alt Windows** while external keyboards have order **Control Windows Alt** so your favorite shortcuts were not Alt-Tab, Alt-C, Alt-V, Alt-F but Win-Tab, Win-C/V/F and accordingly on external keyboard they will not work with third key - Alt - but with second - Windows, which is not how we got used to. To fix it and keep your fingers motorics same on both keyboards the only logical thing to do is to switch Win and Alt keys on external keyboard.
 
 Ctrl-Alt-Win vs Ctrl-Win-Alt:  
-![ctrl-alt-win](./ctrl-alt-win.jpg) &nbsp; &nbsp; &nbsp; ![ctrl-win-alt](./ctrl-win-alt.jpg)
+![ctrl-alt-win](./images/ctrl-alt-win.jpg) &nbsp; &nbsp; ![ctrl-win-alt](./images/ctrl-win-alt.jpg)
 
 ### Switching Win and Alt on external keyboard
 
@@ -44,7 +44,7 @@ Apple Menu -> System Preferences -> Keyboard -> Modifier Keys -> Select your USB
 - Option \ key sends % Command
 - Command % key sends \ Option
 
-![Alt-Win](./alt-win.jpg)
+![Alt-Win](./images/alt-win.png)
 
 That will "fix" issue 3. - Alt and Win keys are switched. Actually we didn't even fix it, internal keyboard still has Win and Alt switched, and now external also, but at least they are both wrong in same way so familiar shortcuts like "Alt"-Tab, "Alt"-X/C/V/F will work "same" on both keyboards. Two wrongs make one right :).
 
@@ -66,7 +66,7 @@ In Preferences select Simple modifications and Add items:
 - From: right_command To: print_screen
 - From: right_option To: insert
 
-![insert_printscreen](./insert_printscreen.jpg)
+![insert_printscreen](./images/insert_printscreen.png)
 
 And voilà, we created Insert and PrintScreen keys out of thin air.
 
@@ -77,7 +77,7 @@ On another unrelated note, if using Control-X/C/V/O/S/Z/Y/F/A for Cut/Copy/Paste
 ### How to map Ctrl-X/C/V/O/S/Z/Y/F/A to Cut/Copy/Paste/...
 
 Go to Apple Menu -> System Preferences -> Shortcuts -> App Shortcuts and add (+):  
-![ctrl-shortcuts](./ctrl-shortcuts.jpg)
+![ctrl-shortcuts](./images/ctrl-shortcuts.png)
 
 This will change every application that has Cut/Copy/Paste/... in menu commands to use new shortcuts. If name in the menu is bit different for example "Find Pattern" it will not work - you will have to add exact name of the menu command. In finder Ctrl-C will not work because finder puts file name into Copy menu command - for example Copy "README.md" for this file. Paste is Paste Item instead of just Paste - it can be fixed by adding Paste Item in App Shortcuts but Ctrl-C cannot be fixed.
 
@@ -111,7 +111,7 @@ Citrix Viewer menu -> Preferences -> Keyboard
 - Send Alt using left % Command
 - Send Windows logo using right % Command - checked
 
-![citrix](./citrix.jpg)
+![citrix](./images/citrix.png)
 
 As we can see, we can chose what sends Control, what sends Alt, but not what sends Win key, so for Win we chose only option available - send it as right Command - or better to say - expect right Command as Win or interpret right Command as Win.
 
@@ -126,8 +126,7 @@ After rule is enabled it goes into:
 
 	~/.config/karabiner/karabiner.json  
 
-![citrix](./karabiner.jpg)
-![citrix](./karabiner.png)
+![citrix](./images/karabiner.png)
 
 Now in karabiner we configure two more rules:
 In Citrix send Tab with Fn so that Citrix doesn't block it
