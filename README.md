@@ -117,12 +117,17 @@ As we can see, we can chose what sends Control, what sends Alt, but not what sen
 
 Second part of configuration is done in Karabiner. Control and Alt are already mapped. Nothing to do in Karabiner. What we need Karabiner for is to map left win to right command and because Mac will take control of Alt-Tab (Command-Tab) and give Mac task list we have to trick it somehow.
 
-For that we will need Karabiner Complex modifications. You can download hundreds of Karabiner modifications from internet. When downloaded they are saved into:  
-	~/.config/karabiner/assets/complex_modifications
+For that we will need Karabiner Complex modifications. You can download hundreds of Karabiner modifications from internet. When downloaded they are saved into:
+
+	~/.config/karabiner/assets/complex_modifications  
 We can also save json files from this repo to that folder and they will appear on the list.
 Every file has a title and a list of rules.
 After rule is enabled it goes into:
-	~/.config/karabiner/karabiner.json
+
+	~/.config/karabiner/karabiner.json  
+
+![citrix](./karabiner.jpg)
+![citrix](./karabiner.png)
 
 Now in karabiner we configure two more rules:
 In Citrix send Tab with Fn so that Citrix doesn't block it
