@@ -79,7 +79,7 @@ On another unrelated note, if using Control-X/C/V/O/S/Z/Y/F/A for Cut/Copy/Paste
 Go to Apple Menu -> System Preferences -> Shortcuts -> App Shortcuts and add (+):  
 ![ctrl-shortcuts](./images/ctrl-shortcuts.png)
 
-This will change every application that has Cut/Copy/Paste/... in menu commands to use new shortcuts. If name in the menu is bit different for example "Find Pattern" it will not work - you will have to add exact name of the menu command. In finder Ctrl-C will not work because finder puts file name into Copy menu command - for example Copy "README.md" for this file. Paste is Paste Item instead of just Paste - it can be fixed by adding Paste Item in App Shortcuts but Ctrl-C cannot be fixed.
+This will change every application that has Cut/Copy/Paste/... in menu commands to use new shortcuts. If name in the menu is bit different for example "Find Pattern" or "Find..." it will not work - you will have to add exact name of the menu command. In finder Ctrl-C will not work because finder puts file name into Copy menu command - for example Copy "README.md" for this file. Paste is Paste Item instead of just Paste - it can be fixed by adding Paste Item in App Shortcuts but Ctrl-C cannot be fixed.
 
 ## Citrix configuration
 
@@ -115,31 +115,37 @@ Citrix Viewer menu -> Preferences -> Keyboard
 
 As we can see, we can chose what sends Control, what sends Alt, but not what sends Win key, so for Win we chose only option available - send it as right Command - or better to say - expect right Command as Win or interpret right Command as Win.
 
-Second part of configuration is done in Karabiner. Control and Alt are already mapped. Nothing to do in Karabiner. What we need Karabiner for is to map left win to right command and because Mac will take control of Alt-Tab (Command-Tab) and give Mac task list we have to trick it somehow.
+Second part of configuration is done in Karabiner. Control and Alt are already mapped. Nothing to do in Karabiner. What we need Karabiner for is to map left win to right command and because Mac will take control of Alt-Tab (Command-Tab) and give Mac tasks list instead of Windows tasks list we have to trick it somehow.
 
-For that we will need Karabiner Complex modifications. You can download hundreds of Karabiner modifications from internet. When downloaded they are saved into:
+For that we will need Karabiner Complex modifications. You can search and download hundreds of Karabiner modifications from internet. When downloaded they are saved into folder:
 
 	~/.config/karabiner/assets/complex_modifications  
-We can also save json files from this repo to that folder and they will appear on the list.
-Every file has a title and a list of rules.
+
+Every downloaded file has a title and a list of rules.
+We can also download json files from this repo to that folder and they will appear on the list.
+
+Our json files in karabiner subfolder:
+
+- citrix.json - for Ctrl-Win-Alt order (normal windows order - we use this one)
+- citrix2.json - Ctrl, Alt, Windows order (Mac order - not used)
+- ctrl-alt-down.json - tried to make ctrl-alt-down work in citrix - it doesn't work
+- printsceen.json - PrintScreen button configuration for Mac and MS remote desktop
+- swap_alt_cmd_rdp.json - Swap left alt and left win for RDP
+
 After rule is enabled it goes into:
 
 	~/.config/karabiner/karabiner.json  
 
+### How to configure Karabiner for Citrix
+
+These are the rules that we have in Karabiner:
+
 ![citrix](./images/karabiner.png)
 
-Now in karabiner we configure two more rules:
-In Citrix send Tab with Fn so that Citrix doesn't block it
-In Citrix send right Command on left Option (Win key) - this will work since Citrix expects right ctrl as Win key (check above)
+For now in karabiner Complex modifications we will enable first two rules - the rest will come in later chapters:
+- In Citrix send Tab with Fn so that Citrix doesn't block it - this will fix Alt-Tab being stolen by Mac OS when we are in Citrix
+- In Citrix send right Command on left Option (Win key) - this will work because Citrix expects right ctrl as Win key (check above)
 
-Additionally in RDP left alt and left win are switched on all keyboards.
-
-Karabiner files are in /Users/dean/.config/karabiner/assets/complex_modifications:
-
-citrix.json - Ctrl, Windows, Alt order (normal windows order - we use this one)
-citrix2.json - Ctrl, Alt, Windows order (Mac order - not used)
-ctrl-alt-down.json - tried to make ctrl-alt-down work in citrix by adding fn modifier but it doesn't work
-swap_alt_cmd_rdp.json - Swap left alt and left win for RDP
 
 ## Microsoft Remote Desktop configuration
 

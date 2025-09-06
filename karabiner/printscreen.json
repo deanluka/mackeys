@@ -1,0 +1,74 @@
+{
+  "title": "PrintScreen Conditional Remapping",
+  "rules": [
+    {
+      "description": "Map Print Screen to macOS Screenshot Utility (Cmd-Shift-5)",
+      "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "print_screen",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "to": [
+            {
+              "key_code": "5",
+              "modifiers": [
+                "left_shift",
+                "left_command"
+              ]
+            }
+          ],
+          "conditions": [
+            {
+              "type": "frontmost_application_unless",
+              "bundle_identifiers": [
+                "^com\\.microsoft\\.rdc\\.macos$",
+                "^com\\.citrix\\.Workspace$",
+                "^com\\.citrix\\.XenAppViewer$",
+                "^com\\.citrix\\.receiver\\.icaviewer\\.mac$"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Map Print Screen to Windows Screenshot Utility (Win-Shift-S) in Microsoft Remote Desktop",
+      "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "print_screen",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "to": [
+            {
+              "key_code": "s",
+              "modifiers": [
+                "left_shift",
+                "left_command"
+              ]
+            }
+          ],
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "bundle_identifiers": [
+                "^com\\.microsoft\\.rdc\\.macos$"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
