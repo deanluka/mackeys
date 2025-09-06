@@ -72,32 +72,35 @@ And voilà, we created Insert and PrintScreen keys out of thin air.
 
 Regarding mapping PrintScreen to Command-Shift-5 in Mac - that will need Karabiner Complex modifications - we will deal with it in the last chapeter - MS remote desktop - you will see why.
 
-On another completely unrelated note, if using Ctrl-X/C/V/O/S/Z/Y/F/A for Cut/Copy/Paste/Open/Save/Undo/Redo/Find and Select All on windows and having to use Command instead on Mac is killing you, you can configure all those shortcuts without touching original ones in native Mac keyboard config. The other option is to switch completely Control and Command but we didn't chose that route.
+On another unrelated note, if using Control-X/C/V/O/S/Z/Y/F/A for Cut/Copy/Paste/Open/Save/Undo/Redo/Find and Select All on windows and having to use Command instead on Mac is killing you, you can remap all those shortcuts in native Mac keyboard config. The other option is to switch completely Control and Command but we didn't go that route because it would impact Alt-Tab, citrix, remote desktop, unix terminal, ...
 
 ### How to map Ctrl-X/C/V/O/S/Z/Y/F/A to Cut/Copy/Paste/...
 
 Go to Apple Menu -> System Preferences -> Shortcuts -> App Shortcuts and add (+):  
 ![ctrl-shortcuts](./ctrl-shortcuts.jpg)
 
+This will change every application that has Cut/Copy/Paste/... in menu commands to use new shortcuts. If name in the menu is bit different for examlpe "Find Pattern" it will not work - you will have to add exact name of the menu command. Also some apps that have their own custom config will not follow new shortcuts - like VSCode - but you can remap them in their own shortcuts config.
 
 ## Citrix configuration
 
 Citrix is very tricky to configure everything to work fine in Windows RDP session. Citrix likes to block some keys and key combos. I was searching for years for good setup that would enable Alt-Tab with real Alt - one next to Space and Alt-Shift-Down for multi-cursor in Notepad++ or VSCode and I finally found it on some page on Internet. Still up to now I didn't find a way to get Ctrl-Alt-Down to get through Citrix so I reconfigured VSCode to use Alt-Shift-Down for multi cursor instead - same as Notepad++.
 
-If you remember from previous chapter and those are the settings that we start from on Mac internal keyboard we have (in the order of keys on keyboard):
-Ctrl sends Ctrl
-Left Option sends Alt
-Left Command sends Windows
+If you remember from previous chapter and those are the settings that we start from, we have (in the order of keys on keyboard):
 
-External keyboard is changed in Karabiner:
-Ctrl sends Ctrl
-Win send Option because this is Option position on Mac
-Alt sends Command because this is normal position for Command key on Mac
+Internal keyboard:
+- Ctrl sends Ctrl
+- Left Option sends Option/Alt
+- Left Command sends Command/Win
+
+External keyboard:
+- Ctrl sends Ctrl
+- Win send Option/Alt because this is Option position on Mac
+- Alt sends Command/Win because this is normal position for Command key on Mac
 
 So after mapping on both internal and external keyboard order of keys is:
-Ctrl
-Option Alt
-Command Win
+- Ctrl
+- Option/Alt
+- Command/Win
 
 Now mapping in citrix is:
 Send Control character using: ^ Control
