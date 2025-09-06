@@ -79,11 +79,11 @@ On another unrelated note, if using Control-X/C/V/O/S/Z/Y/F/A for Cut/Copy/Paste
 Go to Apple Menu -> System Preferences -> Shortcuts -> App Shortcuts and add (+):  
 ![ctrl-shortcuts](./ctrl-shortcuts.jpg)
 
-This will change every application that has Cut/Copy/Paste/... in menu commands to use new shortcuts. If name in the menu is bit different for examlpe "Find Pattern" it will not work - you will have to add exact name of the menu command. Also some apps that have their own custom config will not follow new shortcuts - like VSCode - but you can remap them in their own shortcuts config.
+This will change every application that has Cut/Copy/Paste/... in menu commands to use new shortcuts. If name in the menu is bit different for example "Find Pattern" it will not work - you will have to add exact name of the menu command. In finder Ctrl-C will not work because finder puts file name into Copy menu command - for example Copy "README.md" for this file. Paste is Paste Item instead of just Paste - it can be fixed by adding Paste Item in App Shortcuts but Ctrl-C cannot be fixed.
 
 ## Citrix configuration
 
-Citrix is very tricky to configure everything to work fine in Windows RDP session. Citrix likes to block some keys and key combos. I was searching for years for good setup that would enable Alt-Tab with real Alt - one next to Space and Alt-Shift-Down for multi-cursor in Notepad++ or VSCode and I finally found it on some page on Internet. Still up to now I didn't find a way to get Ctrl-Alt-Down to get through Citrix so I reconfigured VSCode to use Alt-Shift-Down for multi cursor instead - same as Notepad++.
+Citrix is very tricky to configure everything to work fine in Windows RDP session. Citrix and Mac like to block some keys and key combos. I was searching for years for good setup that would enable Alt-Tab with real Alt - one next to Space and Alt-Shift-Down for multi-cursor in Notepad++ or VSCode and I finally found it on some page on Internet. Still up to now I didn't find a way to get Ctrl-Alt-Down to get through Citrix so I reconfigured VSCode to use Alt-Shift-Down for multi cursor instead - same as Notepad++.
 
 If you remember from previous chapter and those are the settings that we start from, we have (in the order of keys on keyboard):
 
@@ -102,14 +102,31 @@ So after mapping on both internal and external keyboard order of keys is Ctrl-Al
 - Option/Alt
 - Command/Win
 
-Now mapping in citrix is:
-Send Control character using: ^ Control
-Send Alt character using: X Command (left) because Command in on normal position for Alt on windows keyboard
-Send Windows logo key using X Command (right) checkbox is selected
+Now, our goal is simple - since with Citrix we are connecting to windows, Ctrl-Alt-Win order should be changed to Ctrl-Win-Alt, either with Karabiner or Citrix configuration or native Mac tools. But it is not so simple. First let's see what are keyboard configuration options in Citrix.
+
+### How to remap keys in Citrix
+
+Citrix Viewer menu -> Preferences -> Keyboard
+- Send Control using ^ Control
+- Send Alt using left % Command
+- Send Windows logo using right % Command - checked
+
+![citrix](./citrix.jpg)
+
+As we can see, we can chose what sends Control, what sends Alt, but not what sends Win key, so for Win we chose only option available - send it as right Command - or better to say - expect right Command as Win or interpret right Command as Win.
+
+Second part of configuration is done in Karabiner. Control and Alt are already mapped. Nothing to do in Karabiner. What we need Karabiner for is to map left win to right command and because Mac will take control of Alt-Tab (Command-Tab) and give Mac task list we have to trick it somehow.
+
+For that we will need Karabiner Complex modifications. You can download hundreds of Karabiner modifications from internet. When downloaded they are saved into:  
+	~/.config/karabiner/assets/complex_modifications
+We can also save json files from this repo to that folder and they will appear on the list.
+Every file has a title and a list of rules.
+After rule is enabled it goes into:
+	~/.config/karabiner/karabiner.json
 
 Now in karabiner we configure two more rules:
 In Citrix send Tab with Fn so that Citrix doesn't block it
-In Citrix send right Command on left Option (Win key) - this will work since Citix expects right ctrl as Win key (check above)
+In Citrix send right Command on left Option (Win key) - this will work since Citrix expects right ctrl as Win key (check above)
 
 Additionally in RDP left alt and left win are switched on all keyboards.
 
