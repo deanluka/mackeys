@@ -113,7 +113,7 @@ Citrix Viewer menu -> Preferences -> Keyboard
 
 ![citrix](./images/citrix.png)
 
-As we can see, we can chose what sends Control, what sends Alt, but not what sends Win key, so for Win we chose only option available - send it as right Command - or better to say - expect right Command as Win or interpret right Command as Win.
+As we can see, we can chose what sends Control, what sends Alt, but not what sends Win key. Default for Win key is of course Command which we can't use because we want it to be Alt. So we chose only other option available - send it as right Command.
 
 Second part of configuration is done in Karabiner. Control and Alt are already mapped. Nothing to do in Karabiner. What we need Karabiner for is to map left win to right command and because Mac will take control of Alt-Tab (Command-Tab) and give Mac tasks list instead of Windows tasks list we have to trick it somehow.
 
