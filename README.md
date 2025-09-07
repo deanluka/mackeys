@@ -104,7 +104,7 @@ So after mapping on both internal and external keyboard order of keys is Ctrl-Al
 
 Now, our goal is simple - since with Citrix we are connecting to windows, Ctrl-Alt-Win order should be changed to Ctrl-Win-Alt, either with Karabiner or Citrix configuration or native Mac tools. But it is not so simple. First let's see what are keyboard configuration options in Citrix.
 
-### How to remap keys in Citrix
+### How to map keys in Citrix
 
 Citrix Viewer menu -> Preferences -> Keyboard
 - Send Control using ^ Control
