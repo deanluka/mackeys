@@ -44,3 +44,6 @@
         ]
     }
 ]
+
+defaults write com.apple.screencapture shadowColor "E0E0E040"
+killall SystemUIServer
