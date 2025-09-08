@@ -115,19 +115,20 @@ Citrix Viewer menu -> Preferences -> Keyboard
 ![citrix](./images/citrixd0.png)
 ![citrix](./images/citrixd0b15.png)
 ![citrix](./images/citrixd0b25.png)
+![citrix](./images/citrix60.png)
 
 As we can see, we can chose what sends Control, what sends Alt, but not what sends Win key. Default for Win key is of course Command which we can't use because we want it to be Alt. So we chose only other option available - send it as right Command.
 
 Second part of configuration is done in Karabiner. Control and Alt are already mapped. Nothing to do in Karabiner. What we need Karabiner for is to map left win to right command and because Mac will take control of Alt-Tab (Command-Tab) and give Mac tasks list instead of Windows tasks list we have to trick it somehow.
 
-For that we will need Karabiner Complex modifications. You can search and download hundreds of Karabiner modifications from internet. When downloaded they are saved into folder:
+For that we will need Karabiner Complex modifications. You can search and download hundreds of Karabiner modifications from internet. When downloaded they are saved into your home folder in:
 
 	~/.config/karabiner/assets/complex_modifications  
 
 Every downloaded file has a title and a list of rules.
 We can also download json files from this repo to that folder and they will appear on the list.
 
-Our json files in karabiner subfolder:
+Our json files in karabiner subfolder are:
 
 - citrix.json - for Ctrl-Win-Alt order (normal windows order - we use this one)
 - citrix2.json - Ctrl, Alt, Windows order (Mac order - not used)
