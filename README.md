@@ -117,6 +117,7 @@ Citrix Viewer menu -> Preferences -> Keyboard
 ![citrix](./images/citrixd0b25.png)
 ![citrix](./images/citrix60.png)
 ![citrix](./images/citrix50_80.png)
+![citrix](./images/citrix_glow.png)
 
 As we can see, we can chose what sends Control, what sends Alt, but not what sends Win key. Default for Win key is of course Command which we can't use because we want it to be Alt. So we chose only other option available - send it as right Command.
 
