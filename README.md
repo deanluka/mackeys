@@ -151,7 +151,63 @@ For now in karabiner Complex modifications we will enable first two rules - the 
 
 Configuring Citrix RDP will not fix keys in Microsoft Remote Desktop. We will fix them.
 
+First thing you will notice is that inside remote desktop on both internal and external keyboard Alt and Win are swapped. We will fix that with Karabiner complex modification
+- Swap Left Alt and Left Command in Microsoft Remote Desktop
+from the file karabiner/swap_alt_cmd_rdp.json. 
+
+Second thing we will notice is that PrintScreen is not working in remote desktop. We will fix that together with the fact that Mac has too many screenshot shortcuts but none of them easy to remember or use by using two complex modifications from the file karabiner/printscree.json.
+
+- Map Print Screen to macOS Screenshot Utility (Cmd-Shift-5)
+- Map Print Screen to Windows Screenshot Utility (Win-Shift-S) in Microsoft Remote Desktop
+
+First mapping will map PrintScreen key (which is PrtScr on external keyboard and Right Command on inernal keyboard) to Comman-Shift-Five which gives most versatile screenshot in Mac, we can chose between full screen, windows or rectangle, same as on windows. Lovely! I used it for all screenshots in this document. This rule will take care not to change PrintScreen in Citrix where it works fine already.
+
+Second rule will map PrintScreen to key combo Win-Shift-S in remote desktop which enables us to do screenshots in remote desktop where PrintScreen was not going through in same way as in Citrix or Mac.
+
+So in the end we have same very handy PrintScreen behavior in all three environments, Mac, Citrix and MS Remote Desktop and i can use it even when I'm on the road without external keyboard on Mac internal keyboard using Right Cmd - Magic :)
+
+Icing on the cake for my worthy followers who came this far. Mac puts shadow on window screenshots, unfortunately this shadow is transparent black which means it is gray on white background and completely invisible on black background.
+
+I wanted my background to be gray on white background and also gray on black background so that people with dark github or vscode themes can also see it.
+
+So i asked copilot how to make it, first advice was change bg color in Mac settings with defaults command - in the end it came out that option was deprecated and dropped since Mojave and Catalina. Next option was to edit images in gimp - so Copilot was suggesting method after method and even said i can try it for you. And try he did. He created picture with half white, half black background and text Example with shadow. Unfortunately every picture he created didn't have any visible shadow on black background what so ever.
+
+So i tried my self:
+- open Mac window png screenshot with gimp
+- chose Select by color tool - click on shadow - delete it
+- select -> none
+- filters - light and shadow - drop shadow (legacy)
+- offset x - 10
+- offset y - 15
+- vlur radius - 25
+- color - d0d0d0
+- opacity - 90
+- if you want you can also do image -> crop to content
+
+You can see the results if you try this repo in light and dark theme on github
 
 ## Microsoft Windows configuration
 
-If you by any chance manage to install Windows on Macbook here you can see how to configure keys to make your life easier or just worth living.
+If you by any chance manage to install Windows on Macbook here you can see how to configure keys to make your life easier or just worth living. 
+
+First, if you are using just external keyboard there is nothing to fix = any external windows keyboard will work with windows with notorious Ctrl-Win-Alt keys in perfect order and plenty of keys like PrintSceen, Insert, Delete, Home, End, Page Up, Page Down. It is windows after all, not Mac :)
+
+On internal keyboard however you will have two issues:
+
+- No PrintScreen and Insert - by now you probably noticed that i don't like to live without these keys
+- Alt-Win keys are swapped
+
+Regarding first - solution is easy - exactly same as on Mac - we map Right Command and Right Option to PrintScreen and Insert - only we don't map it with Karabiner, but with SharpKeys.
+
+SharpKeys is fine utility that can map any key to any key - one to one - like Karabiner simple modifications, no complex modifications, and doesn't recognize devices.
+
+Regarding swapped Alt-Win keys I searched for months for a tool that can swap them only for internal keyboard but I didn't find any tool that can do remapping for one keyboard and not for the other. None. If you find any please let me know.
+
+So my solution was this:
+- with SharpKeys i add PrintScreen and Insert so I have them even on internal keyboard
+- i keep Win-Alt order as is which means by default they are on on external keyboard and flipped on internal
+- if i need to flip them temporary because I'm on the road and want to use internal keyboard i flip them with Autohotkeys
+- if I need to flip them for longer time on the road I flip them with sharpkeys and reboot (sharpkeys needs reboot after every change)
+
+Well now obviously to finish this document i will have to reboot my Mac to windows to get some screenshots. See you in next commit :)
+
