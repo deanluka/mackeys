@@ -211,3 +211,41 @@ So my solution was this:
 
 Well now obviously to finish this document i will have to reboot my Mac to windows to get some screenshots. See you in next commit :)
 
+
+
+
+
+
+### Swapping Alt-Win on internal keyboard only (Boot Camp)
+
+For per-device remapping (internal Mac keyboard only, external keyboards untouched), use **MacKeysRemap**:
+
+- Uses **Interception driver** for hardware-level per-device remapping
+- Internal Mac keyboard: Option→Win, Command→Alt
+- External keyboards: no remapping
+- Pure C# + Interception (no AHK conflicts)
+
+#### Step 1: Install Interception Driver
+
+1. Download from https://github.com/oblitum/Interception/releases
+2. Extract and open **Command Prompt as Administrator**
+3. Run: install-interception.exe /install
+4. **Reboot your computer**
+
+> The driver is safe, open-source, and widely used. Uninstall anytime with install-interception.exe /uninstall + reboot.
+
+#### Step 2: Download and Run
+
+1. Download MacKeysRemap.exe from [Releases](https://github.com/deanluka/mackeys/releases)
+2. **Right-click** → **"Run as administrator"**
+
+The app auto-detects the internal Mac keyboard. To specify manually:
+MacKeysRemap.exe "Apple Internal Keyboard"
+
+#### Building from Source
+
+Requires [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0):
+
+    git clone https://github.com/deanluka/mackeys.git
+    cd mackeys/mackeys-windows
+    dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o publish
