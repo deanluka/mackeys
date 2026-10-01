@@ -1,0 +1,13 @@
+{
+  "InternalKeyboard": "Apple",
+  "Remappings": [
+    {
+      "From": "LAlt",
+      "To": "LWin"
+    },
+    {
+      "From": "LWin",
+      "To": "LAlt"
+    }
+  ]
+}
