@@ -17,7 +17,7 @@ public class MainForm : Form
     private Label _statusLabel = null!;
     private System.Windows.Forms.Timer _refreshTimer = null!;
 
-    private RemappingConfig _config = null!;
+    private List<KeyRemapping> _config = new();
     private InterceptionRemapper? _remapper;
     private TrayIcon? _trayIcon;
     private bool _driverWarningShown = false;
@@ -33,9 +33,6 @@ public class MainForm : Form
 
     [DllImport(InterceptionDll, CallingConvention = CallingConvention.Cdecl)]
     private static extern void interception_destroy_context(IntPtr context);
-
-    [DllImport(InterceptionDll, CallingConvention = CallingConvention.Cdecl)]
-    private static extern int interception_get(IntPtr context, int device);
 
     [DllImport(InterceptionDll, CallingConvention = CallingConvention.Cdecl)]
     private static extern int interception_send(IntPtr context, int device, ref KeyStroke stroke, int n);
@@ -65,7 +62,23 @@ public class MainForm : Form
         InitializeComponent();
         LoadConfig();
         LoadKeyboards();
-        _trayIcon = new TrayIcon(this);
+
+        // First run: no config file existed before; show window
+        // Subsequent runs: config exists; go straight to tray
+        bool isFirstRun = !File.Exists(ConfigManager.GetConfigPath());
+        _trayIcon = new TrayIcon(this, isFirstRun);
+
+        // Enable auto-start on first run
+        if (isFirstRun)
+        {
+            try
+            {
+                using var key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(
+                    @"Software\Microsoft\Windows\CurrentVersion\Run");
+                key.SetValue("MacKeysRemap", Application.ExecutablePath);
+            }
+            catch { }
+        }
     }
 
     private void InitializeComponent()
@@ -74,10 +87,10 @@ public class MainForm : Form
         Size = new Size(800, 600);
         StartPosition = FormStartPosition.CenterScreen;
 
-        // Keyboard selector
+        // Keyboard selector (for adding mappings)
         var keyboardLabel = new Label
         {
-            Text = "Target Keyboard:",
+            Text = "Add mapping for:",
             Location = new Point(20, 20),
             AutoSize = true
         };
@@ -86,17 +99,16 @@ public class MainForm : Form
         _keyboardSelector = new ComboBox
         {
             Location = new Point(150, 17),
-            Size = new Size(300, 25),
+            Size = new Size(250, 25),
             DropDownStyle = ComboBoxStyle.DropDownList
         };
-        _keyboardSelector.SelectedIndexChanged += (s, e) => UpdateStatus();
         Controls.Add(_keyboardSelector);
 
         // Refresh button
         var refreshButton = new Button
         {
             Text = "Refresh",
-            Location = new Point(470, 16),
+            Location = new Point(420, 16),
             Size = new Size(80, 25)
         };
         refreshButton.Click += (s, e) => LoadKeyboards();
@@ -157,6 +169,7 @@ public class MainForm : Form
             SelectionMode = DataGridViewSelectionMode.FullRowSelect,
             AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
         };
+        _remappingGrid.Columns.Add("Keyboard", "Keyboard");
         _remappingGrid.Columns.Add("From", "From Key");
         _remappingGrid.Columns.Add("To", "To Key");
         Controls.Add(_remappingGrid);
@@ -265,28 +278,28 @@ public class MainForm : Form
         }
         catch (DllNotFoundException)
         {
-            _keyboardSelector.Items.Add(new KeyboardItem { Id = 0, Name = "Interception driver not installed" });
-            _keyboardSelector.Enabled = false;
             if (!_driverWarningShown)
             {
                 _driverWarningShown = true;
-                MessageBox.Show("Interception driver not found.\n\nPlease install it from https://github.com/oblitum/Interception", "Driver Missing", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                var result = MessageBox.Show(
+                    "Interception driver not found.\n\nShould I install it for you?",
+                    "Driver Missing",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question);
+
+                if (result == DialogResult.Yes)
+                {
+                    InstallDriver();
+                }
             }
+            _keyboardSelector.Items.Add(new KeyboardItem { Id = 0, Name = "Interception driver not installed" });
+            _keyboardSelector.Enabled = false;
             return;
         }
 
         if (_keyboardSelector.Items.Count > 0)
         {
-            // Select the one matching config
-            for (int i = 0; i < _keyboardSelector.Items.Count; i++)
-            {
-                var item = (KeyboardItem)_keyboardSelector.Items[i];
-                if (item.Name.Contains(_config.InternalKeyboard, StringComparison.OrdinalIgnoreCase))
-                {
-                    _keyboardSelector.SelectedIndex = i;
-                    return;
-                }
-            }
+            _keyboardSelector.Enabled = true;
             _keyboardSelector.SelectedIndex = 0;
         }
     }
@@ -312,9 +325,10 @@ public class MainForm : Form
     private void RefreshGrid()
     {
         _remappingGrid.Rows.Clear();
-        foreach (var remap in _config.Remappings)
+        foreach (var remap in _config)
         {
             _remappingGrid.Rows.Add(
+                remap.Keyboard,
                 KeyNames.GetDisplayName(remap.From),
                 KeyNames.GetDisplayName(remap.To)
             );
@@ -323,8 +337,10 @@ public class MainForm : Form
 
     private void AddButton_Click(object? sender, EventArgs e)
     {
+        if (_keyboardSelector.SelectedItem is not KeyboardItem item) return;
         if (_fromKeySelector.SelectedItem == null || _toKeySelector.SelectedItem == null) return;
 
+        string keyboard = item.Name;
         string from = _fromKeySelector.SelectedItem.ToString()!;
         string to = _toKeySelector.SelectedItem.ToString()!;
 
@@ -334,7 +350,7 @@ public class MainForm : Form
             return;
         }
 
-        _config.Remappings.Add(new KeyRemapping { From = from, To = to });
+        _config.Add(new KeyRemapping { Keyboard = keyboard, From = from, To = to });
         RefreshGrid();
     }
 
@@ -343,31 +359,21 @@ public class MainForm : Form
         if (_remappingGrid.SelectedRows.Count == 0) return;
 
         int index = _remappingGrid.SelectedRows[0].Index;
-        if (index >= 0 && index < _config.Remappings.Count)
+        if (index >= 0 && index < _config.Count)
         {
-            _config.Remappings.RemoveAt(index);
+            _config.RemoveAt(index);
             RefreshGrid();
         }
     }
 
     private void SaveButton_Click(object? sender, EventArgs e)
     {
-        if (_keyboardSelector.SelectedItem is KeyboardItem item)
-        {
-            _config.InternalKeyboard = item.Name;
-        }
-
         ConfigManager.Save(_config);
         MessageBox.Show("Config saved!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
     }
 
     private void StartButton_Click(object? sender, EventArgs e)
     {
-        if (_keyboardSelector.SelectedItem is KeyboardItem item)
-        {
-            _config.InternalKeyboard = item.Name;
-        }
-
         ConfigManager.Save(_config);
 
         _remapper = new InterceptionRemapper(_config);
@@ -395,11 +401,52 @@ public class MainForm : Form
         _statusLabel.ForeColor = Color.Black;
     }
 
-    private void UpdateStatus()
+    private void InstallDriver()
     {
-        if (_keyboardSelector.SelectedItem is KeyboardItem item)
+        try
         {
-            _statusLabel.Text = $"Selected: {item.Name}";
+            string url = "https://github.com/oblitum/Interception/releases/latest/download/Interception.zip";
+            string tempPath = Path.GetTempPath();
+            string zipPath = Path.Combine(tempPath, "Interception.zip");
+            string extractPath = Path.Combine(tempPath, "Interception");
+
+            using (var client = new System.Net.WebClient())
+            {
+                client.DownloadFile(url, zipPath);
+            }
+
+            System.IO.Compression.ZipFile.ExtractToDirectory(zipPath, extractPath, true);
+
+            string installerPath = Path.Combine(extractPath, "install-interception.exe");
+            if (File.Exists(installerPath))
+            {
+                var result = MessageBox.Show(
+                    "Interception driver downloaded.\n\nInstall now? (requires reboot after)",
+                    "Install Driver",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question);
+
+                if (result == DialogResult.Yes)
+                {
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = installerPath,
+                        Arguments = "/install",
+                        Verb = "runas",
+                        UseShellExecute = true
+                    });
+
+                    MessageBox.Show(
+                        "Driver installed.\n\nPlease reboot your computer for changes to take effect.",
+                        "Reboot Required",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Failed to install driver: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 
