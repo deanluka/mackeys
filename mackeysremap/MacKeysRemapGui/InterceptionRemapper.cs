@@ -27,6 +27,9 @@ public class InterceptionRemapper
     [DllImport(InterceptionDll, CallingConvention = CallingConvention.Cdecl)]
     private static extern int interception_is_keyboard(int device);
 
+    [DllImport(InterceptionDll, CallingConvention = CallingConvention.Cdecl)]
+    private static extern int interception_get_hardware_id(int device, IntPtr buffer, int size);
+
     [StructLayout(LayoutKind.Sequential)]
     private struct KeyStroke
     {
@@ -35,12 +38,12 @@ public class InterceptionRemapper
         public uint Information;
     }
 
-    private readonly RemappingConfig _config;
+    private readonly List<KeyRemapping> _config;
     private IntPtr _context;
     private CancellationTokenSource? _cts;
     private Task? _remapTask;
 
-    public InterceptionRemapper(RemappingConfig config)
+    public InterceptionRemapper(List<KeyRemapping> config)
     {
         _config = config;
     }
@@ -81,13 +84,13 @@ public class InterceptionRemapper
                 int result = interception_receive(_context, i, ref stroke, 1);
                 if (result == 0) continue;
 
-                // Check if this is the target keyboard
-                // Note: In a real implementation, you'd check the device ID
-                // For now, we apply remapping to the selected keyboard
+                // Get keyboard name for this device
+                string keyboardName = GetKeyboardName(i);
 
-                // Apply remapping
-                foreach (var remap in _config.Remappings)
+                // Apply remapping for this specific keyboard
+                foreach (var remap in _config)
                 {
+                    if (remap.Keyboard != keyboardName) continue;
                     if (GetScanCode(remap.From) == stroke.Code)
                     {
                         stroke.Code = GetScanCode(remap.To);
@@ -99,6 +102,24 @@ public class InterceptionRemapper
             }
 
             Thread.Sleep(1);
+        }
+    }
+
+    private static string GetKeyboardName(int deviceId)
+    {
+        var buffer = Marshal.AllocHGlobal(1024);
+        try
+        {
+            int len = interception_get_hardware_id(deviceId, buffer, 1024);
+            return len > 0 ? Marshal.PtrToStringAnsi(buffer) ?? $"Keyboard {deviceId}" : $"Keyboard {deviceId}";
+        }
+        catch
+        {
+            return $"Keyboard {deviceId}";
+        }
+        finally
+        {
+            Marshal.FreeHGlobal(buffer);
         }
     }
 

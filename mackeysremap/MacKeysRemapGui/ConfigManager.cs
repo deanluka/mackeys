@@ -2,14 +2,9 @@ using System.Text.Json;
 
 namespace MacKeysRemapGui;
 
-public class RemappingConfig
-{
-    public string InternalKeyboard { get; set; } = "Apple";
-    public List<KeyRemapping> Remappings { get; set; } = new();
-}
-
 public class KeyRemapping
 {
+    public string Keyboard { get; set; } = "";
     public string From { get; set; } = "";
     public string To { get; set; } = "";
 }
@@ -24,20 +19,24 @@ public static class ConfigManager
         WriteIndented = true
     };
 
-    public static RemappingConfig Load()
+    public static List<KeyRemapping> Load()
     {
         if (!File.Exists(ConfigPath))
         {
-            var defaultConfig = new RemappingConfig();
+            var defaultConfig = new List<KeyRemapping>
+            {
+                new() { Keyboard = "Apple", From = "LAlt", To = "LWin" },
+                new() { Keyboard = "Apple", From = "LWin", To = "LAlt" }
+            };
             Save(defaultConfig);
             return defaultConfig;
         }
 
         string json = File.ReadAllText(ConfigPath);
-        return JsonSerializer.Deserialize<RemappingConfig>(json) ?? new RemappingConfig();
+        return JsonSerializer.Deserialize<List<KeyRemapping>>(json) ?? new List<KeyRemapping>();
     }
 
-    public static void Save(RemappingConfig config)
+    public static void Save(List<KeyRemapping> config)
     {
         string json = JsonSerializer.Serialize(config, Options);
         File.WriteAllText(ConfigPath, json);
