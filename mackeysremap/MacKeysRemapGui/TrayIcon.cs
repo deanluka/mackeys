@@ -5,6 +5,7 @@ public class TrayIcon : IDisposable
     private NotifyIcon _notifyIcon = null!;
     private ContextMenuStrip _contextMenu = null!;
     private Form _form;
+    private bool _disposed = false;
 
     public TrayIcon(Form form)
     {
@@ -30,10 +31,13 @@ public class TrayIcon : IDisposable
 
         _notifyIcon.DoubleClick += (s, e) => ShowForm();
 
-        _form.ResumeLayout();
-        _form.WindowState = FormWindowState.Minimized;
-        _form.ShowInTaskbar = false;
-        _form.Hide();
+        // Minimize to tray after form is shown
+        _form.Shown += (s, e) =>
+        {
+            _form.WindowState = FormWindowState.Minimized;
+            _form.ShowInTaskbar = false;
+            _form.Hide();
+        };
     }
 
     private void ShowForm()
@@ -58,6 +62,8 @@ public class TrayIcon : IDisposable
 
     public void Dispose()
     {
+        if (_disposed) return;
+        _disposed = true;
         _notifyIcon?.Dispose();
         _contextMenu?.Dispose();
     }
