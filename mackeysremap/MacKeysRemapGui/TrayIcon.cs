@@ -31,12 +31,11 @@ public class TrayIcon : IDisposable
 
         _notifyIcon.DoubleClick += (s, e) => ShowForm();
 
-        // Minimize to tray after form is shown
+        // Show form on startup (don't hide to tray automatically)
         _form.Shown += (s, e) =>
         {
-            _form.WindowState = FormWindowState.Minimized;
-            _form.ShowInTaskbar = false;
-            _form.Hide();
+            _form.WindowState = FormWindowState.Normal;
+            _form.ShowInTaskbar = true;
         };
     }
 
