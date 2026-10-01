@@ -417,8 +417,9 @@ public class MainForm : Form
 
             System.IO.Compression.ZipFile.ExtractToDirectory(zipPath, extractPath, true);
 
-            string installerPath = Path.Combine(extractPath, "install-interception.exe");
-            if (File.Exists(installerPath))
+            // Find installer recursively (it may be in a subfolder)
+            string installerPath = Directory.GetFiles(extractPath, "install-interception.exe", SearchOption.AllDirectories).FirstOrDefault() ?? "";
+            if (!string.IsNullOrEmpty(installerPath))
             {
                 var result = MessageBox.Show(
                     "Interception driver downloaded.\n\nInstall now? (requires reboot after)",
