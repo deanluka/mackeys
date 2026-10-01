@@ -251,13 +251,23 @@ public class MainForm : Form
     {
         _keyboardSelector.Items.Clear();
 
-        for (int i = 1; i <= INTERCEPTION_MAX_KEYBOARD; i++)
+        try
         {
-            if (interception_is_keyboard(i) == 1)
+            for (int i = 1; i <= INTERCEPTION_MAX_KEYBOARD; i++)
             {
-                string name = GetKeyboardName(i);
-                _keyboardSelector.Items.Add(new KeyboardItem { Id = i, Name = name });
+                if (interception_is_keyboard(i) == 1)
+                {
+                    string name = GetKeyboardName(i);
+                    _keyboardSelector.Items.Add(new KeyboardItem { Id = i, Name = name });
+                }
             }
+        }
+        catch (DllNotFoundException)
+        {
+            _keyboardSelector.Items.Add(new KeyboardItem { Id = 0, Name = "Interception driver not installed" });
+            _keyboardSelector.Enabled = false;
+            MessageBox.Show("Interception driver not found.\n\nPlease install it from https://github.com/oblitum/Interception", "Driver Missing", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
         }
 
         if (_keyboardSelector.Items.Count > 0)
