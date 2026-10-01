@@ -19,6 +19,7 @@ public class MainForm : Form
 
     private RemappingConfig _config = null!;
     private InterceptionRemapper? _remapper;
+    private TrayIcon? _trayIcon;
 
     // Interception P/Invoke
     private const string InterceptionDll = "interception.dll";
@@ -63,6 +64,7 @@ public class MainForm : Form
         InitializeComponent();
         LoadConfig();
         LoadKeyboards();
+        _trayIcon = new TrayIcon(this);
     }
 
     private void InitializeComponent()
@@ -388,8 +390,15 @@ public class MainForm : Form
 
     protected override void OnFormClosing(FormClosingEventArgs e)
     {
+        if (e.CloseReason == CloseReason.UserClosing)
+        {
+            e.Cancel = true;
+            Hide();
+            return;
+        }
         _remapper?.Stop();
         _refreshTimer?.Stop();
+        _trayIcon?.Dispose();
         base.OnFormClosing(e);
     }
 }
