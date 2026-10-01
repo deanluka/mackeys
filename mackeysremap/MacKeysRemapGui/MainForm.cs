@@ -20,6 +20,7 @@ public class MainForm : Form
     private RemappingConfig _config = null!;
     private InterceptionRemapper? _remapper;
     private TrayIcon? _trayIcon;
+    private bool _driverWarningShown = false;
 
     // Interception P/Invoke
     private const string InterceptionDll = "interception.dll";
@@ -266,7 +267,11 @@ public class MainForm : Form
         {
             _keyboardSelector.Items.Add(new KeyboardItem { Id = 0, Name = "Interception driver not installed" });
             _keyboardSelector.Enabled = false;
-            MessageBox.Show("Interception driver not found.\n\nPlease install it from https://github.com/oblitum/Interception", "Driver Missing", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            if (!_driverWarningShown)
+            {
+                _driverWarningShown = true;
+                MessageBox.Show("Interception driver not found.\n\nPlease install it from https://github.com/oblitum/Interception", "Driver Missing", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
             return;
         }
 
