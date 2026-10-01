@@ -428,13 +428,15 @@ public class MainForm : Form
 
                 if (result == DialogResult.Yes)
                 {
-                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                    var process = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                     {
                         FileName = installerPath,
                         Arguments = "/install",
                         Verb = "runas",
                         UseShellExecute = true
                     });
+
+                    process?.WaitForExit();
 
                     MessageBox.Show(
                         "Driver installed.\n\nPlease reboot your computer for changes to take effect.",
