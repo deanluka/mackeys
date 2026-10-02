@@ -47,7 +47,14 @@ public class TrayIcon : IDisposable
             Visible = true
         };
 
-        _notifyIcon.DoubleClick += (s, e) => ShowForm();
+        _notifyIcon.Click += (s, e) =>
+        {
+            // Left click: show GUI directly
+            if (e is MouseEventArgs me && me.Button == MouseButtons.Left)
+            {
+                ShowForm();
+            }
+        };
 
         // First run: show window; otherwise: go straight to tray
         if (_isFirstRun)
