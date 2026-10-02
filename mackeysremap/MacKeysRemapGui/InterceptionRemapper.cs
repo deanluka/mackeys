@@ -222,6 +222,10 @@ public class InterceptionRemapper : IDisposable
         string fromKeyNameByVK = KeyNames.GetKeyNameFromVK((byte)kbData.vkCode);
         bool isMediaVK = kbData.vkCode >= 0xAD && kbData.vkCode <= 0xB7;
 
+        // Hook only handles media keys — pass through everything else immediately
+        if (!isMediaVK)
+            return InterceptionNative.CallNextHookEx(_hookId, nCode, wParam, lParam);
+
         if (isDown && EnableVerboseDebugLogging)
         {
             string keyLabel = string.IsNullOrEmpty(fromKeyNameByVK) ? $"VK_0x{kbData.vkCode:X2}" : fromKeyNameByVK;
