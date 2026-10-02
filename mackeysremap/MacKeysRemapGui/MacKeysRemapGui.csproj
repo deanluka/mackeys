@@ -9,6 +9,8 @@
     <AssemblyName>MacKeysRemapGui</AssemblyName>
     <RootNamespace>MacKeysRemapGui</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <DebugType>None</DebugType>
+    <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
 
   <ItemGroup>
