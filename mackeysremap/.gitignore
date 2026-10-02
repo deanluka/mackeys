@@ -1,0 +1,5 @@
+# Interception driver DLLs (license restriction - do not distribute)
+MacKeysRemapGui/publish/interception.dll
+MacKeysRemapGui/publish/interception.lib
+MacKeysRemapGui/publish/interception.exp
+MacKeysRemapGui/publish/interception.pdb
