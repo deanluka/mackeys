@@ -388,17 +388,24 @@ public class MainForm : Form
     {
         ConfigManager.Save(_config);
 
-        _remapper = new InterceptionRemapper(_config);
-        if (_remapper.Start())
+        try
         {
-            _startButton.Enabled = false;
-            _stopButton.Enabled = true;
-            _statusLabel.Text = "Status: Running";
-            _statusLabel.ForeColor = Color.Green;
+            _remapper = new InterceptionRemapper(_config);
+            if (_remapper.Start())
+            {
+                _startButton.Enabled = false;
+                _stopButton.Enabled = true;
+                _statusLabel.Text = "Status: Running";
+                _statusLabel.ForeColor = Color.Green;
+            }
+            else
+            {
+                MessageBox.Show("Failed to start remapping. Make sure Interception driver is installed.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
-        else
+        catch (Exception ex)
         {
-            MessageBox.Show("Failed to start remapping. Make sure Interception driver is installed.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show($"Crash on start:\n\n{ex.GetType().Name}: {ex.Message}\n\n{ex.StackTrace}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 
