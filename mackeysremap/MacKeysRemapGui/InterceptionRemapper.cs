@@ -17,6 +17,9 @@ public class InterceptionRemapper : IDisposable
     private readonly Dictionary<int, (string HardwareId, string FriendlyName)> _deviceCache = new();
     private bool _disposed = false;
 
+    // Shared variable: tracks which device sent the last key (for media key remapping)
+    public static string LastActiveDevice = "";
+
     private IntPtr _hookId = IntPtr.Zero;
     private InterceptionNative.LowLevelKeyboardProc? _hookProc;
     private long _totalStrokesSeen;
@@ -127,6 +130,9 @@ public class InterceptionRemapper : IDisposable
                 _deviceCache[device] = devInfo;
                 OnLog?.Invoke($"[NEW DEVICE CACHED] Dev {device}: Friendly='{devInfo.FriendlyName}', HWID='{devInfo.HardwareId}'");
             }
+
+            // Track last active device for media key remapping
+            LastActiveDevice = devInfo.FriendlyName;
 
             bool isE0 = (stroke.State & InterceptionNative.INTERCEPTION_KEY_E0) != 0;
             bool isE1 = (stroke.State & InterceptionNative.INTERCEPTION_KEY_E1) != 0;
@@ -259,9 +265,16 @@ public class InterceptionRemapper : IDisposable
                 string.Equals(remap.Keyboard, "All", StringComparison.OrdinalIgnoreCase) ||
                 string.Equals(remap.Keyboard, "All Keyboards", StringComparison.OrdinalIgnoreCase);
 
+            // For media keys, check if LastActiveDevice matches the rule's scope
             if (!keyboardIsGlobal && isMediaVK && isDown)
             {
-                OnLog?.Invoke($"[LL-WARN] MEDIA rule '{remap.Keyboard}' {remap.From}->{remap.To} is per-device, but WH_KEYBOARD_LL hook has NO device info. WILL STILL MATCH rule anyway (media keys bypass Interception, so per-device scoping is impossible for them at hook layer).");
+                bool deviceMatches = MatchesKeyboard(remap.Keyboard, 0, "", LastActiveDevice);
+                if (!deviceMatches)
+                {
+                    OnLog?.Invoke($"[LL-SKIP] MEDIA rule '{remap.Keyboard}' {remap.From}->{remap.To} — LastActiveDevice='{LastActiveDevice}' does not match scope. Passing through.");
+                    continue;
+                }
+                OnLog?.Invoke($"[LL-MATCH] MEDIA rule '{remap.Keyboard}' {remap.From}->{remap.To} — LastActiveDevice='{LastActiveDevice}' matches scope.");
             }
 
             if (!string.Equals(remap.From, fromKeyNameByVK, StringComparison.OrdinalIgnoreCase))
