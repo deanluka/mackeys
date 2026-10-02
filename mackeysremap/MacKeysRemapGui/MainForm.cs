@@ -14,6 +14,7 @@ public class MainForm : Form
     private Button _saveButton = null!;
     private Button _startButton = null!;
     private Button _stopButton = null!;
+    private Button _exitButton = null!;
     private Label _statusLabel = null!;
     private TextBox _logTextBox = null!;
     private Button _captureFromButton = null!;
@@ -23,41 +24,6 @@ public class MainForm : Form
     private InterceptionRemapper? _remapper;
     private TrayIcon? _trayIcon;
     private bool _driverWarningShown = false;
-
-    // Interception P/Invoke
-    private const string InterceptionDll = "interception.dll";
-    private const int INTERCEPTION_KEYBOARD = 1;
-    private const int INTERCEPTION_MAX_KEYBOARD = 10;
-    private const ushort INTERCEPTION_FILTER_KEYBOARD_ALL = 0xFFFF;
-
-    [DllImport(InterceptionDll, CallingConvention = CallingConvention.Cdecl)]
-    private static extern IntPtr interception_create_context();
-
-    [DllImport(InterceptionDll, CallingConvention = CallingConvention.Cdecl)]
-    private static extern void interception_destroy_context(IntPtr context);
-
-    [DllImport(InterceptionDll, CallingConvention = CallingConvention.Cdecl)]
-    private static extern int interception_send(IntPtr context, int device, ref KeyStroke stroke, int n);
-
-    [DllImport(InterceptionDll, CallingConvention = CallingConvention.Cdecl)]
-    private static extern int interception_receive(IntPtr context, int device, ref KeyStroke stroke, int n);
-
-    [DllImport(InterceptionDll, CallingConvention = CallingConvention.Cdecl)]
-    private static extern void interception_set_filter(IntPtr context, int predicate, ushort filter);
-
-    [DllImport(InterceptionDll, CallingConvention = CallingConvention.Cdecl)]
-    private static extern int interception_is_keyboard(int device);
-
-    [DllImport(InterceptionDll, CallingConvention = CallingConvention.Cdecl)]
-    private static extern int interception_get_hardware_id(int device, IntPtr buffer, int size);
-
-    [StructLayout(LayoutKind.Sequential)]
-    private struct KeyStroke
-    {
-        public ushort Code;
-        public ushort State;
-        public uint Information;
-    }
 
     public MainForm()
     {
@@ -105,15 +71,15 @@ public class MainForm : Form
         _keyboardSelector = new ComboBox
         {
             Location = new Point(80, 12),
-            Size = new Size(250, 25),
-            DropDownStyle = ComboBoxStyle.DropDown
+            Size = new Size(330, 25),
+            DropDownStyle = ComboBoxStyle.DropDownList
         };
         Controls.Add(_keyboardSelector);
 
         var refreshButton = new Button
         {
             Text = "Refresh",
-            Location = new Point(340, 11),
+            Location = new Point(420, 11),
             Size = new Size(60, 23)
         };
         refreshButton.Click += (s, e) => LoadKeyboards();
@@ -131,7 +97,7 @@ public class MainForm : Form
         _fromKeySelector = new ComboBox
         {
             Location = new Point(80, 42),
-            Size = new Size(120, 25),
+            Size = new Size(130, 25),
             DropDownStyle = ComboBoxStyle.DropDownList
         };
         Controls.Add(_fromKeySelector);
@@ -139,7 +105,7 @@ public class MainForm : Form
         _captureFromButton = new Button
         {
             Text = "Press",
-            Location = new Point(205, 41),
+            Location = new Point(215, 41),
             Size = new Size(50, 23)
         };
         _captureFromButton.Click += CaptureFromButton_Click;
@@ -149,15 +115,15 @@ public class MainForm : Form
         var toLabel = new Label
         {
             Text = "To:",
-            Location = new Point(270, 45),
+            Location = new Point(280, 45),
             AutoSize = true
         };
         Controls.Add(toLabel);
 
         _toKeySelector = new ComboBox
         {
-            Location = new Point(300, 42),
-            Size = new Size(120, 25),
+            Location = new Point(310, 42),
+            Size = new Size(130, 25),
             DropDownStyle = ComboBoxStyle.DropDownList
         };
         Controls.Add(_toKeySelector);
@@ -165,7 +131,7 @@ public class MainForm : Form
         _captureToButton = new Button
         {
             Text = "Press",
-            Location = new Point(425, 41),
+            Location = new Point(445, 41),
             Size = new Size(50, 23)
         };
         _captureToButton.Click += CaptureToButton_Click;
@@ -175,8 +141,8 @@ public class MainForm : Form
         _addButton = new Button
         {
             Text = "Add",
-            Location = new Point(490, 41),
-            Size = new Size(50, 23)
+            Location = new Point(510, 41),
+            Size = new Size(60, 23)
         };
         _addButton.Click += AddButton_Click;
         Controls.Add(_addButton);
@@ -185,7 +151,7 @@ public class MainForm : Form
         _remappingGrid = new DataGridView
         {
             Location = new Point(10, 75),
-            Size = new Size(770, 200),
+            Size = new Size(765, 200),
             AllowUserToAddRows = false,
             AllowUserToDeleteRows = false,
             ReadOnly = true,
@@ -221,7 +187,7 @@ public class MainForm : Form
         _startButton = new Button
         {
             Text = "Start",
-            Location = new Point(550, 285),
+            Location = new Point(470, 285),
             Size = new Size(70, 25),
             BackColor = Color.LightGreen
         };
@@ -232,13 +198,24 @@ public class MainForm : Form
         _stopButton = new Button
         {
             Text = "Stop",
-            Location = new Point(630, 285),
+            Location = new Point(550, 285),
             Size = new Size(70, 25),
             BackColor = Color.LightCoral,
             Enabled = false
         };
         _stopButton.Click += StopButton_Click;
         Controls.Add(_stopButton);
+
+        // Exit button
+        _exitButton = new Button
+        {
+            Text = "Exit App",
+            Location = new Point(630, 285),
+            Size = new Size(75, 25),
+            BackColor = Color.LightGray
+        };
+        _exitButton.Click += ExitButton_Click;
+        Controls.Add(_exitButton);
 
         // Status label
         _statusLabel = new Label
@@ -254,7 +231,7 @@ public class MainForm : Form
         _logTextBox = new TextBox
         {
             Location = new Point(10, 350),
-            Size = new Size(770, 200),
+            Size = new Size(765, 200),
             Multiline = true,
             ScrollBars = ScrollBars.Vertical,
             ReadOnly = true,
@@ -277,11 +254,25 @@ public class MainForm : Form
         // Populate key selectors
         foreach (var key in KeyNames.GetAllKeyNames())
         {
-            _fromKeySelector.Items.Add(key);
-            _toKeySelector.Items.Add(key);
+            _fromKeySelector.Items.Add(new KeySelectorItem(key, KeyNames.GetDisplayName(key)));
+            _toKeySelector.Items.Add(new KeySelectorItem(key, KeyNames.GetDisplayName(key)));
         }
-        if (_fromKeySelector.Items.Count > 0) _fromKeySelector.SelectedIndex = 0;
-        if (_toKeySelector.Items.Count > 1) _toKeySelector.SelectedIndex = 1;
+
+        SelectKeyInComboBox(_fromKeySelector, "LAlt");
+        SelectKeyInComboBox(_toKeySelector, "LWin");
+    }
+
+    private static void SelectKeyInComboBox(ComboBox comboBox, string keyName)
+    {
+        for (int i = 0; i < comboBox.Items.Count; i++)
+        {
+            if (comboBox.Items[i] is KeySelectorItem item && item.KeyName.Equals(keyName, StringComparison.OrdinalIgnoreCase))
+            {
+                comboBox.SelectedIndex = i;
+                return;
+            }
+        }
+        if (comboBox.Items.Count > 0) comboBox.SelectedIndex = 0;
     }
 
     private void LoadConfig()
@@ -294,62 +285,95 @@ public class MainForm : Form
     {
         _keyboardSelector.Items.Clear();
 
+        IntPtr context = IntPtr.Zero;
         try
         {
-            for (int i = 1; i <= INTERCEPTION_MAX_KEYBOARD; i++)
+            context = InterceptionNative.interception_create_context();
+            if (context == IntPtr.Zero)
             {
-                if (interception_is_keyboard(i) == 1)
+                ShowDriverMissingPrompt();
+                return;
+            }
+
+            _keyboardSelector.Items.Add(new KeyboardItem
+            {
+                DeviceId = 0,
+                HardwareId = "All",
+                DisplayName = "All Keyboards"
+            });
+
+            int detectedCount = 0;
+            for (int i = 1; i <= InterceptionNative.INTERCEPTION_MAX_KEYBOARD; i++)
+            {
+                if (InterceptionNative.interception_is_keyboard(i) == 1)
                 {
-                    string name = GetKeyboardName(i);
-                    _keyboardSelector.Items.Add(new KeyboardItem { Id = i, Name = name });
-                    Log($"Found keyboard {i}: {name}");
+                    string hwId = InterceptionNative.GetHardwareId(context, i);
+                    if (!string.IsNullOrWhiteSpace(hwId))
+                    {
+                        detectedCount++;
+                        string friendly = InterceptionNative.GetFriendlyDeviceName(hwId, i);
+                        _keyboardSelector.Items.Add(new KeyboardItem
+                        {
+                            DeviceId = i,
+                            HardwareId = hwId,
+                            DisplayName = friendly
+                        });
+                        Log($"Found keyboard {i}: {friendly} ({hwId})");
+                    }
                 }
+            }
+
+            if (detectedCount == 0)
+            {
+                Log("No active keyboard devices responded with hardware IDs.");
+            }
+            else
+            {
+                Log($"Total active keyboards detected: {detectedCount}");
             }
         }
         catch (DllNotFoundException)
         {
-            if (!_driverWarningShown)
-            {
-                _driverWarningShown = true;
-                var result = MessageBox.Show(
-                    "Interception driver not found.\n\nShould I install it for you?",
-                    "Driver Missing",
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Question);
-
-                if (result == DialogResult.Yes)
-                {
-                    InstallDriver();
-                }
-            }
-            _keyboardSelector.Items.Add(new KeyboardItem { Id = 0, Name = "Interception driver not installed" });
-            _keyboardSelector.Enabled = false;
+            ShowDriverMissingPrompt();
             return;
+        }
+        catch (Exception ex)
+        {
+            Log($"Error enumerating keyboards: {ex.Message}");
+        }
+        finally
+        {
+            if (context != IntPtr.Zero)
+            {
+                InterceptionNative.interception_destroy_context(context);
+            }
         }
 
         if (_keyboardSelector.Items.Count > 0)
         {
             _keyboardSelector.Enabled = true;
-            _keyboardSelector.SelectedIndex = 0;
+            _keyboardSelector.SelectedIndex = _keyboardSelector.Items.Count > 1 ? 1 : 0;
         }
     }
 
-    private string GetKeyboardName(int deviceId)
+    private void ShowDriverMissingPrompt()
     {
-        var buffer = Marshal.AllocHGlobal(1024);
-        try
+        if (!_driverWarningShown)
         {
-            int len = interception_get_hardware_id(deviceId, buffer, 1024);
-            return len > 0 ? Marshal.PtrToStringUni(buffer) ?? $"Unknown {deviceId}" : $"Unknown {deviceId}";
+            _driverWarningShown = true;
+            var result = MessageBox.Show(
+                "Interception driver not found or not loaded.\n\nWould you like to download and install it now? (Requires administrator privileges and reboot)",
+                "Driver Missing",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
+
+            if (result == DialogResult.Yes)
+            {
+                InstallDriver();
+            }
         }
-        catch
-        {
-            return $"Unknown {deviceId}";
-        }
-        finally
-        {
-            Marshal.FreeHGlobal(buffer);
-        }
+        _keyboardSelector.Items.Add(new KeyboardItem { DeviceId = 0, DisplayName = "Interception driver not installed" });
+        _keyboardSelector.Enabled = false;
     }
 
     private void RefreshGrid()
@@ -368,46 +392,50 @@ public class MainForm : Form
     private void CaptureFromButton_Click(object? sender, EventArgs e)
     {
         using var dialog = new KeyCaptureDialog();
-        if (dialog.ShowDialog() == DialogResult.OK)
+        if (dialog.ShowDialog(this) == DialogResult.OK && !string.IsNullOrEmpty(dialog.CapturedKey))
         {
-            _fromKeySelector.SelectedItem = dialog.CapturedKey;
-            Log($"Captured source: {dialog.CapturedKey}");
+            SelectKeyInComboBox(_fromKeySelector, dialog.CapturedKey);
+            Log($"Captured source key: {dialog.CapturedKey} ({KeyNames.GetDisplayName(dialog.CapturedKey)})");
         }
     }
 
     private void CaptureToButton_Click(object? sender, EventArgs e)
     {
         using var dialog = new KeyCaptureDialog();
-        if (dialog.ShowDialog() == DialogResult.OK)
+        if (dialog.ShowDialog(this) == DialogResult.OK && !string.IsNullOrEmpty(dialog.CapturedKey))
         {
-            _toKeySelector.SelectedItem = dialog.CapturedKey;
-            Log($"Captured target: {dialog.CapturedKey}");
+            SelectKeyInComboBox(_toKeySelector, dialog.CapturedKey);
+            Log($"Captured target key: {dialog.CapturedKey} ({KeyNames.GetDisplayName(dialog.CapturedKey)})");
         }
     }
 
     private void AddButton_Click(object? sender, EventArgs e)
     {
-        if (_fromKeySelector.SelectedItem == null || _toKeySelector.SelectedItem == null) return;
-
-        string keyboard = _keyboardSelector.Text;
-        string from = _fromKeySelector.SelectedItem.ToString()!;
-        string to = _toKeySelector.SelectedItem.ToString()!;
-
-        if (string.IsNullOrEmpty(keyboard))
+        if (_fromKeySelector.SelectedItem is not KeySelectorItem fromItem ||
+            _toKeySelector.SelectedItem is not KeySelectorItem toItem)
         {
-            MessageBox.Show("Please enter or select a keyboard name.", "Invalid", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
+        string keyboard = _keyboardSelector.SelectedItem is KeyboardItem kbItem ? kbItem.DisplayName : _keyboardSelector.Text;
+        string from = fromItem.KeyName;
+        string to = toItem.KeyName;
+
+        if (string.IsNullOrWhiteSpace(keyboard))
+        {
+            MessageBox.Show("Please select a keyboard.", "Invalid Selection", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return;
         }
 
         if (from == to)
         {
-            MessageBox.Show("From and To keys must be different.", "Invalid", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            MessageBox.Show("From and To keys must be different.", "Invalid Remap", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return;
         }
 
         _config.Add(new KeyRemapping { Keyboard = keyboard, From = from, To = to });
         RefreshGrid();
-        Log($"Added: {keyboard} | {from} -> {to}");
+        Log($"Added mapping: [{keyboard}] {from} -> {to}");
     }
 
     private void RemoveButton_Click(object? sender, EventArgs e)
@@ -417,16 +445,18 @@ public class MainForm : Form
         int index = _remappingGrid.SelectedRows[0].Index;
         if (index >= 0 && index < _config.Count)
         {
+            var removed = _config[index];
             _config.RemoveAt(index);
             RefreshGrid();
+            Log($"Removed mapping: [{removed.Keyboard}] {removed.From} -> {removed.To}");
         }
     }
 
     private void SaveButton_Click(object? sender, EventArgs e)
     {
         ConfigManager.Save(_config);
-        Log("Config saved");
-        MessageBox.Show("Config saved!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        Log("Config saved to file.");
+        MessageBox.Show("Configuration saved successfully!", "Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
     }
 
     private void StartButton_Click(object? sender, EventArgs e)
@@ -435,22 +465,35 @@ public class MainForm : Form
 
         try
         {
-            Log("Starting remapping...");
-            Log($"Config has {_config.Count} mappings");
+            Log("Starting remapping engine...");
+            Log($"Loaded {_config.Count} active remapping rule(s):");
+            for (int i = 0; i < _config.Count; i++)
+            {
+                var r = _config[i];
+                Log($"  #{i + 1}: [{r.Keyboard}] {r.From} -> {r.To}");
+            }
 
             _remapper = new InterceptionRemapper(_config);
+            _remapper.OnLog += msg =>
+            {
+                if (!IsDisposed && IsHandleCreated)
+                {
+                    try { BeginInvoke(() => Log(msg)); } catch { }
+                }
+            };
+
             if (_remapper.Start())
             {
                 _startButton.Enabled = false;
                 _stopButton.Enabled = true;
                 _statusLabel.Text = "Status: Running";
                 _statusLabel.ForeColor = Color.Green;
-                Log("Remapping started successfully");
+                Log("Remapping is active.");
             }
             else
             {
-                Log("Failed: interception_create_context returned null");
-                MessageBox.Show("Failed to start remapping. Make sure Interception driver is installed.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Log("Failed: interception_create_context returned null (driver not installed or administrator permission needed)");
+                MessageBox.Show("Failed to start remapping. Please ensure Interception driver is installed and the app is run as Administrator.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
         catch (Exception ex)
@@ -470,10 +513,18 @@ public class MainForm : Form
         _stopButton.Enabled = false;
         _statusLabel.Text = "Status: Stopped";
         _statusLabel.ForeColor = Color.Black;
-        Log("Remapping stopped");
+        Log("Remapping stopped.");
     }
 
-    private void InstallDriver()
+    private void ExitButton_Click(object? sender, EventArgs e)
+    {
+        _remapper?.Stop();
+        _remapper = null;
+        _trayIcon?.Dispose();
+        Application.Exit();
+    }
+
+    private async void InstallDriver()
     {
         try
         {
@@ -482,18 +533,24 @@ public class MainForm : Form
             string zipPath = Path.Combine(tempPath, "Interception.zip");
             string extractPath = Path.Combine(tempPath, "Interception");
 
-            using (var client = new System.Net.WebClient())
+            Log("Downloading Interception driver package...");
+            using (var client = new System.Net.Http.HttpClient())
             {
-                client.DownloadFile(url, zipPath);
+                var bytes = await client.GetByteArrayAsync(url);
+                await File.WriteAllBytesAsync(zipPath, bytes);
             }
 
+            if (Directory.Exists(extractPath))
+            {
+                Directory.Delete(extractPath, true);
+            }
             System.IO.Compression.ZipFile.ExtractToDirectory(zipPath, extractPath, true);
 
             string installerPath = Directory.GetFiles(extractPath, "install-interception.exe", SearchOption.AllDirectories).FirstOrDefault() ?? "";
             if (!string.IsNullOrEmpty(installerPath))
             {
                 var result = MessageBox.Show(
-                    "Interception driver downloaded.\n\nInstall now? (requires reboot after)",
+                    "Interception driver downloaded.\n\nInstall now? (Requires reboot after installation)",
                     "Install Driver",
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question);
@@ -512,12 +569,15 @@ public class MainForm : Form
 
                     try
                     {
-                        string dllSource = Directory.GetFiles(extractPath, "interception.dll", SearchOption.AllDirectories).FirstOrDefault() ?? "";
+                        string dllSource = Directory.GetFiles(extractPath, "interception.dll", SearchOption.AllDirectories)
+                            .FirstOrDefault(p => p.Contains("x64", StringComparison.OrdinalIgnoreCase))
+                            ?? Directory.GetFiles(extractPath, "interception.dll", SearchOption.AllDirectories).FirstOrDefault() ?? "";
+
                         if (!string.IsNullOrEmpty(dllSource))
                         {
                             string dllDest = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "interception.dll");
                             File.Copy(dllSource, dllDest, true);
-                            Log("Copied interception.dll to exe folder");
+                            Log("Copied interception.dll to application directory.");
                         }
                     }
                     catch (Exception ex)
@@ -526,7 +586,7 @@ public class MainForm : Form
                     }
 
                     MessageBox.Show(
-                        "Driver installed.\n\nPlease reboot your computer for changes to take effect.",
+                        "Driver installed successfully.\n\nPlease reboot your computer for changes to take effect.",
                         "Reboot Required",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Information);
@@ -543,7 +603,10 @@ public class MainForm : Form
     private void Log(string message)
     {
         string timestamp = DateTime.Now.ToString("HH:mm:ss");
-        _logTextBox?.AppendText($"[{timestamp}] {message}{Environment.NewLine}");
+        if (_logTextBox != null && !_logTextBox.IsDisposed)
+        {
+            _logTextBox.AppendText($"[{timestamp}] {message}{Environment.NewLine}");
+        }
     }
 
     protected override void OnFormClosing(FormClosingEventArgs e)
@@ -564,12 +627,33 @@ public class KeyCaptureDialog : Form
 {
     public string CapturedKey { get; private set; } = "";
     private IntPtr _context = IntPtr.Zero;
-    private bool _capturing = true;
+    private readonly CancellationTokenSource _cts = new();
+    private IntPtr _hookId = IntPtr.Zero;
+    private readonly LowLevelKeyboardProc _hookProc;
+
+    private delegate IntPtr LowLevelKeyboardProc(int nCode, IntPtr wParam, IntPtr lParam);
+
+    [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+    private static extern IntPtr SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, IntPtr hMod, uint dwThreadId);
+
+    [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool UnhookWindowsHookEx(IntPtr hhk);
+
+    [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+    private static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, IntPtr lParam);
+
+    [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+    private static extern IntPtr GetModuleHandle(string? lpModuleName);
+
+    private const int WH_KEYBOARD_LL = 13;
+    private const int WM_KEYDOWN = 0x0100;
+    private const int WM_SYSKEYDOWN = 0x0104;
 
     public KeyCaptureDialog()
     {
         Text = "Press a key...";
-        Size = new Size(300, 150);
+        Size = new Size(320, 160);
         StartPosition = FormStartPosition.CenterParent;
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
@@ -577,146 +661,132 @@ public class KeyCaptureDialog : Form
 
         var label = new Label
         {
-            Text = "Press any key...",
-            Location = new Point(20, 20),
+            Text = "Press any key to capture...",
+            Location = new Point(30, 25),
             AutoSize = true,
-            Font = new Font(Font.FontFamily, 12)
+            Font = new Font(Font.FontFamily, 11, FontStyle.Regular)
         };
         Controls.Add(label);
 
         var cancelButton = new Button
         {
             Text = "Cancel",
-            Location = new Point(100, 70),
-            Size = new Size(80, 30),
+            Location = new Point(110, 75),
+            Size = new Size(85, 28),
             DialogResult = DialogResult.Cancel
         };
         Controls.Add(cancelButton);
 
-        Task.Run(() => CaptureLoop());
+        _hookProc = HookCallback;
+        _hookId = SetWindowsHookEx(WH_KEYBOARD_LL, _hookProc, GetModuleHandle(null), 0);
+
+        Task.Run(() => CaptureLoop(_cts.Token));
     }
 
-    private void CaptureLoop()
+    private IntPtr HookCallback(int nCode, IntPtr wParam, IntPtr lParam)
     {
-        try
+        if (nCode >= 0 && (wParam == (IntPtr)WM_KEYDOWN || wParam == (IntPtr)WM_SYSKEYDOWN))
         {
-            _context = interception_create_context();
-            if (_context == IntPtr.Zero) return;
-
-            interception_set_filter(_context, INTERCEPTION_KEYBOARD, INTERCEPTION_FILTER_KEYBOARD_ALL);
-
-            var stroke = new KeyStroke();
-            while (_capturing)
+            int vkCode = Marshal.ReadInt32(lParam);
+            string keyName = KeyNames.GetKeyNameFromVK((byte)vkCode);
+            if (!string.IsNullOrEmpty(keyName))
             {
-                for (int i = 1; i <= INTERCEPTION_MAX_KEYBOARD; i++)
+                BeginInvoke(() =>
                 {
-                    if (interception_is_keyboard(i) != 1) continue;
-                    int result = interception_receive(_context, i, ref stroke, 1);
-                    if (result == 0) continue;
-
-                    string keyName = GetKeyNameFromScanCode(stroke.Code);
-                    BeginInvoke(() =>
+                    if (string.IsNullOrEmpty(CapturedKey))
                     {
                         CapturedKey = keyName;
                         DialogResult = DialogResult.OK;
                         Close();
-                    });
-                    return;
+                    }
+                });
+            }
+        }
+        return CallNextHookEx(_hookId, nCode, wParam, lParam);
+    }
+
+    private void CaptureLoop(CancellationToken ct)
+    {
+        try
+        {
+            _context = InterceptionNative.interception_create_context();
+            if (_context == IntPtr.Zero) return;
+
+            InterceptionNative.interception_set_filter(
+                _context,
+                InterceptionNative.IsKeyboardPredicate,
+                InterceptionNative.INTERCEPTION_FILTER_KEY_ALL);
+
+            var stroke = new InterceptionNative.KeyStroke();
+            while (!ct.IsCancellationRequested && _context != IntPtr.Zero)
+            {
+                int device = InterceptionNative.interception_wait_with_timeout(_context, 50);
+                if (device <= 0) continue;
+
+                if (InterceptionNative.interception_receive(_context, device, ref stroke, 1) > 0)
+                {
+                    bool isKeyUp = (stroke.State & InterceptionNative.INTERCEPTION_KEY_UP) != 0;
+                    bool isE0 = (stroke.State & InterceptionNative.INTERCEPTION_KEY_E0) != 0;
+
+                    // Pass stroke through so keys do not get stuck
+                    InterceptionNative.interception_send(_context, device, ref stroke, 1);
+
+                    if (!isKeyUp)
+                    {
+                        string keyName = KeyNames.GetKeyName(stroke.Code, isE0);
+                        BeginInvoke(() =>
+                        {
+                            if (string.IsNullOrEmpty(CapturedKey))
+                            {
+                                CapturedKey = keyName;
+                                DialogResult = DialogResult.OK;
+                                Close();
+                            }
+                        });
+                        return;
+                    }
                 }
-                Thread.Sleep(10);
             }
         }
         catch { }
     }
 
-    private static string GetKeyNameFromScanCode(ushort code)
-    {
-        return code switch
-        {
-            0x38 => "LAlt",
-            0xE038 => "RAlt",
-            0x5B => "LWin",
-            0xE05C => "RWin",
-            0x1D => "LCtrl",
-            0xE01D => "RCtrl",
-            0x2A => "LShift",
-            0x36 => "RShift",
-            0x3B => "F1",
-            0x3C => "F2",
-            0x3D => "F3",
-            0x3E => "F4",
-            0x3F => "F5",
-            0x40 => "F6",
-            0x41 => "F7",
-            0x42 => "F8",
-            0x43 => "F9",
-            0x44 => "F10",
-            0x57 => "F11",
-            0x58 => "F12",
-            0xE052 => "Insert",
-            0xE053 => "Delete",
-            0xE047 => "Home",
-            0xE04F => "End",
-            0xE049 => "PageUp",
-            0xE051 => "PageDown",
-            0xE037 => "PrintScreen",
-            0x46 => "ScrollLock",
-            0xE045 => "Pause",
-            0x3A => "CapsLock",
-            0x45 => "NumLock",
-            0x01 => "Escape",
-            0x39 => "Space",
-            0x0F => "Tab",
-            0x1C => "Enter",
-            0x0E => "Backspace",
-            _ => $"Key 0x{code:X}"
-        };
-    }
-
     protected override void OnFormClosing(FormClosingEventArgs e)
     {
-        _capturing = false;
+        _cts.Cancel();
+        if (_hookId != IntPtr.Zero)
+        {
+            UnhookWindowsHookEx(_hookId);
+            _hookId = IntPtr.Zero;
+        }
         if (_context != IntPtr.Zero)
         {
-            interception_destroy_context(_context);
+            InterceptionNative.interception_destroy_context(_context);
             _context = IntPtr.Zero;
         }
         base.OnFormClosing(e);
-    }
-
-    private const string InterceptionDll = "interception.dll";
-    private const int INTERCEPTION_KEYBOARD = 1;
-    private const int INTERCEPTION_MAX_KEYBOARD = 10;
-    private const ushort INTERCEPTION_FILTER_KEYBOARD_ALL = 0xFFFF;
-
-    [DllImport(InterceptionDll, CallingConvention = CallingConvention.Cdecl)]
-    private static extern IntPtr interception_create_context();
-
-    [DllImport(InterceptionDll, CallingConvention = CallingConvention.Cdecl)]
-    private static extern void interception_destroy_context(IntPtr context);
-
-    [DllImport(InterceptionDll, CallingConvention = CallingConvention.Cdecl)]
-    private static extern int interception_receive(IntPtr context, int device, ref KeyStroke stroke, int n);
-
-    [DllImport(InterceptionDll, CallingConvention = CallingConvention.Cdecl)]
-    private static extern void interception_set_filter(IntPtr context, int predicate, ushort filter);
-
-    [DllImport(InterceptionDll, CallingConvention = CallingConvention.Cdecl)]
-    private static extern int interception_is_keyboard(int device);
-
-    [StructLayout(LayoutKind.Sequential)]
-    private struct KeyStroke
-    {
-        public ushort Code;
-        public ushort State;
-        public uint Information;
     }
 }
 
 public class KeyboardItem
 {
-    public int Id { get; set; }
-    public string Name { get; set; } = "";
+    public int DeviceId { get; set; }
+    public string HardwareId { get; set; } = "";
+    public string DisplayName { get; set; } = "";
 
-    public override string ToString() => Name;
+    public override string ToString() => DisplayName;
+}
+
+public class KeySelectorItem
+{
+    public string KeyName { get; set; }
+    public string DisplayName { get; set; }
+
+    public KeySelectorItem(string keyName, string displayName)
+    {
+        KeyName = keyName;
+        DisplayName = displayName;
+    }
+
+    public override string ToString() => DisplayName;
 }

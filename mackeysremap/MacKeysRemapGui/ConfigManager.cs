@@ -1,3 +1,4 @@
+using System.Text.Encodings.Web;
 using System.Text.Json;
 
 namespace MacKeysRemapGui;
@@ -16,7 +17,8 @@ public static class ConfigManager
 
     private static readonly JsonSerializerOptions Options = new()
     {
-        WriteIndented = true
+        WriteIndented = true,
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
     };
 
     public static List<KeyRemapping> Load()
@@ -25,8 +27,8 @@ public static class ConfigManager
         {
             var defaultConfig = new List<KeyRemapping>
             {
-                new() { Keyboard = "Apple", From = "LAlt", To = "LWin" },
-                new() { Keyboard = "Apple", From = "LWin", To = "LAlt" }
+                new() { Keyboard = "All Keyboards", From = "LAlt", To = "LWin" },
+                new() { Keyboard = "All Keyboards", From = "LWin", To = "LAlt" }
             };
             Save(defaultConfig);
             return defaultConfig;
