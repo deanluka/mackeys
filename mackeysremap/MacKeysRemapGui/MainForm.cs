@@ -21,6 +21,7 @@ public class MainForm : Form
     private Button _captureToButton = null!;
     private bool _capturingFrom = false;
     private bool _capturingTo = false;
+    private IntPtr _captureContext = IntPtr.Zero;
 
     private List<KeyRemapping> _config = new();
     private InterceptionRemapper? _remapper;
@@ -91,22 +92,22 @@ public class MainForm : Form
     private void InitializeComponent()
     {
         Text = "MacKeysRemap - Per-Device Key Remapper";
-        Size = new Size(900, 700);
+        Size = new Size(800, 650);
         StartPosition = FormStartPosition.CenterScreen;
 
         // Keyboard selector
         var keyboardLabel = new Label
         {
-            Text = "Add mapping for:",
-            Location = new Point(20, 20),
+            Text = "Keyboard:",
+            Location = new Point(10, 15),
             AutoSize = true
         };
         Controls.Add(keyboardLabel);
 
         _keyboardSelector = new ComboBox
         {
-            Location = new Point(150, 17),
-            Size = new Size(300, 25),
+            Location = new Point(80, 12),
+            Size = new Size(250, 25),
             DropDownStyle = ComboBoxStyle.DropDown
         };
         Controls.Add(_keyboardSelector);
@@ -114,8 +115,8 @@ public class MainForm : Form
         var refreshButton = new Button
         {
             Text = "Refresh",
-            Location = new Point(470, 16),
-            Size = new Size(80, 25)
+            Location = new Point(340, 11),
+            Size = new Size(60, 23)
         };
         refreshButton.Click += (s, e) => LoadKeyboards();
         Controls.Add(refreshButton);
@@ -123,25 +124,25 @@ public class MainForm : Form
         // From key
         var fromLabel = new Label
         {
-            Text = "From Key:",
-            Location = new Point(20, 60),
+            Text = "From:",
+            Location = new Point(10, 45),
             AutoSize = true
         };
         Controls.Add(fromLabel);
 
         _fromKeySelector = new ComboBox
         {
-            Location = new Point(150, 57),
-            Size = new Size(200, 25),
+            Location = new Point(80, 42),
+            Size = new Size(120, 25),
             DropDownStyle = ComboBoxStyle.DropDownList
         };
         Controls.Add(_fromKeySelector);
 
         _captureFromButton = new Button
         {
-            Text = "Press Key",
-            Location = new Point(360, 56),
-            Size = new Size(80, 25)
+            Text = "Press",
+            Location = new Point(205, 41),
+            Size = new Size(50, 23)
         };
         _captureFromButton.Click += CaptureFromButton_Click;
         Controls.Add(_captureFromButton);
@@ -149,25 +150,25 @@ public class MainForm : Form
         // To key
         var toLabel = new Label
         {
-            Text = "To Key:",
-            Location = new Point(460, 60),
+            Text = "To:",
+            Location = new Point(270, 45),
             AutoSize = true
         };
         Controls.Add(toLabel);
 
         _toKeySelector = new ComboBox
         {
-            Location = new Point(540, 57),
-            Size = new Size(200, 25),
+            Location = new Point(300, 42),
+            Size = new Size(120, 25),
             DropDownStyle = ComboBoxStyle.DropDownList
         };
         Controls.Add(_toKeySelector);
 
         _captureToButton = new Button
         {
-            Text = "Press Key",
-            Location = new Point(750, 56),
-            Size = new Size(80, 25)
+            Text = "Press",
+            Location = new Point(425, 41),
+            Size = new Size(50, 23)
         };
         _captureToButton.Click += CaptureToButton_Click;
         Controls.Add(_captureToButton);
@@ -176,8 +177,8 @@ public class MainForm : Form
         _addButton = new Button
         {
             Text = "Add",
-            Location = new Point(850, 56),
-            Size = new Size(60, 25)
+            Location = new Point(490, 41),
+            Size = new Size(50, 23)
         };
         _addButton.Click += AddButton_Click;
         Controls.Add(_addButton);
@@ -185,8 +186,8 @@ public class MainForm : Form
         // Remapping grid
         _remappingGrid = new DataGridView
         {
-            Location = new Point(20, 100),
-            Size = new Size(840, 250),
+            Location = new Point(10, 75),
+            Size = new Size(770, 200),
             AllowUserToAddRows = false,
             AllowUserToDeleteRows = false,
             ReadOnly = true,
@@ -201,9 +202,9 @@ public class MainForm : Form
         // Remove button
         _removeButton = new Button
         {
-            Text = "Remove Selected",
-            Location = new Point(20, 360),
-            Size = new Size(120, 30)
+            Text = "Remove",
+            Location = new Point(10, 285),
+            Size = new Size(80, 25)
         };
         _removeButton.Click += RemoveButton_Click;
         Controls.Add(_removeButton);
@@ -211,9 +212,9 @@ public class MainForm : Form
         // Save button
         _saveButton = new Button
         {
-            Text = "Save Config",
-            Location = new Point(160, 360),
-            Size = new Size(100, 30)
+            Text = "Save",
+            Location = new Point(100, 285),
+            Size = new Size(60, 25)
         };
         _saveButton.Click += SaveButton_Click;
         Controls.Add(_saveButton);
@@ -221,9 +222,9 @@ public class MainForm : Form
         // Start button
         _startButton = new Button
         {
-            Text = "Start Remapping",
-            Location = new Point(500, 360),
-            Size = new Size(120, 30),
+            Text = "Start",
+            Location = new Point(550, 285),
+            Size = new Size(70, 25),
             BackColor = Color.LightGreen
         };
         _startButton.Click += StartButton_Click;
@@ -232,9 +233,9 @@ public class MainForm : Form
         // Stop button
         _stopButton = new Button
         {
-            Text = "Stop Remapping",
-            Location = new Point(640, 360),
-            Size = new Size(120, 30),
+            Text = "Stop",
+            Location = new Point(630, 285),
+            Size = new Size(70, 25),
             BackColor = Color.LightCoral,
             Enabled = false
         };
@@ -245,31 +246,23 @@ public class MainForm : Form
         _statusLabel = new Label
         {
             Text = "Status: Stopped",
-            Location = new Point(20, 410),
+            Location = new Point(10, 320),
             AutoSize = true,
-            Font = new Font(Font.FontFamily, 10, FontStyle.Bold)
+            Font = new Font(Font.FontFamily, 9, FontStyle.Bold)
         };
         Controls.Add(_statusLabel);
 
         // Log textbox
-        var logLabel = new Label
-        {
-            Text = "Log:",
-            Location = new Point(20, 450),
-            AutoSize = true
-        };
-        Controls.Add(logLabel);
-
         _logTextBox = new TextBox
         {
-            Location = new Point(20, 475),
-            Size = new Size(840, 150),
+            Location = new Point(10, 350),
+            Size = new Size(770, 200),
             Multiline = true,
             ScrollBars = ScrollBars.Vertical,
             ReadOnly = true,
             BackColor = Color.Black,
             ForeColor = Color.LightGreen,
-            Font = new Font("Consolas", 9)
+            Font = new Font("Consolas", 8)
         };
         Controls.Add(_logTextBox);
 
@@ -277,7 +270,7 @@ public class MainForm : Form
         var configPathLabel = new Label
         {
             Text = $"Config: {ConfigManager.GetConfigPath()}",
-            Location = new Point(20, 635),
+            Location = new Point(10, 560),
             AutoSize = true,
             ForeColor = Color.Gray
         };
@@ -385,17 +378,169 @@ public class MainForm : Form
     private void CaptureFromButton_Click(object? sender, EventArgs e)
     {
         _capturingFrom = true;
-        _captureFromButton.Text = "Press a key...";
+        _captureFromButton.Text = "...";
         _captureFromButton.Enabled = false;
         Log("Press a key for SOURCE...");
+
+        Task.Run(() =>
+        {
+            try
+            {
+                _captureContext = interception_create_context();
+                if (_captureContext == IntPtr.Zero)
+                {
+                    BeginInvoke(() =>
+                    {
+                        _captureFromButton.Text = "Press";
+                        _captureFromButton.Enabled = true;
+                        Log("Failed to create capture context");
+                    });
+                    return;
+                }
+
+                interception_set_filter(_captureContext, INTERCEPTION_KEYBOARD, INTERCEPTION_FILTER_KEYBOARD_ALL);
+
+                var stroke = new KeyStroke();
+                while (_capturingFrom)
+                {
+                    for (int i = 1; i <= INTERCEPTION_MAX_KEYBOARD; i++)
+                    {
+                        if (interception_is_keyboard(i) != 1) continue;
+                        int result = interception_receive(_captureContext, i, ref stroke, 1);
+                        if (result == 0) continue;
+
+                        string keyName = GetKeyNameFromScanCode(stroke.Code);
+                        BeginInvoke(() =>
+                        {
+                            _fromKeySelector.SelectedItem = keyName;
+                            _captureFromButton.Text = "Press";
+                            _captureFromButton.Enabled = true;
+                            _capturingFrom = false;
+                            Log($"Captured source key: {keyName} (scan code: 0x{stroke.Code:X})");
+                        });
+                        return;
+                    }
+                    Thread.Sleep(10);
+                }
+            }
+            catch (Exception ex)
+            {
+                BeginInvoke(() =>
+                {
+                    _captureFromButton.Text = "Press";
+                    _captureFromButton.Enabled = true;
+                    _capturingFrom = false;
+                    Log($"Capture error: {ex.Message}");
+                });
+            }
+        });
     }
 
     private void CaptureToButton_Click(object? sender, EventArgs e)
     {
         _capturingTo = true;
-        _captureToButton.Text = "Press a key...";
+        _captureToButton.Text = "...";
         _captureToButton.Enabled = false;
         Log("Press a key for TARGET...");
+
+        Task.Run(() =>
+        {
+            try
+            {
+                if (_captureContext == IntPtr.Zero)
+                    _captureContext = interception_create_context();
+
+                if (_captureContext == IntPtr.Zero)
+                {
+                    BeginInvoke(() =>
+                    {
+                        _captureToButton.Text = "Press";
+                        _captureToButton.Enabled = true;
+                        Log("Failed to create capture context");
+                    });
+                    return;
+                }
+
+                interception_set_filter(_captureContext, INTERCEPTION_KEYBOARD, INTERCEPTION_FILTER_KEYBOARD_ALL);
+
+                var stroke = new KeyStroke();
+                while (_capturingTo)
+                {
+                    for (int i = 1; i <= INTERCEPTION_MAX_KEYBOARD; i++)
+                    {
+                        if (interception_is_keyboard(i) != 1) continue;
+                        int result = interception_receive(_captureContext, i, ref stroke, 1);
+                        if (result == 0) continue;
+
+                        string keyName = GetKeyNameFromScanCode(stroke.Code);
+                        BeginInvoke(() =>
+                        {
+                            _toKeySelector.SelectedItem = keyName;
+                            _captureToButton.Text = "Press";
+                            _captureToButton.Enabled = true;
+                            _capturingTo = false;
+                            Log($"Captured target key: {keyName} (scan code: 0x{stroke.Code:X})");
+                        });
+                        return;
+                    }
+                    Thread.Sleep(10);
+                }
+            }
+            catch (Exception ex)
+            {
+                BeginInvoke(() =>
+                {
+                    _captureToButton.Text = "Press";
+                    _captureToButton.Enabled = true;
+                    _capturingTo = false;
+                    Log($"Capture error: {ex.Message}");
+                });
+            }
+        });
+    }
+
+    private static string GetKeyNameFromScanCode(ushort code)
+    {
+        return code switch
+        {
+            0x38 => "LAlt",
+            0xE038 => "RAlt",
+            0x5B => "LWin",
+            0xE05C => "RWin",
+            0x1D => "LCtrl",
+            0xE01D => "RCtrl",
+            0x2A => "LShift",
+            0x36 => "RShift",
+            0x3B => "F1",
+            0x3C => "F2",
+            0x3D => "F3",
+            0x3E => "F4",
+            0x3F => "F5",
+            0x40 => "F6",
+            0x41 => "F7",
+            0x42 => "F8",
+            0x43 => "F9",
+            0x44 => "F10",
+            0x57 => "F11",
+            0x58 => "F12",
+            0xE052 => "Insert",
+            0xE053 => "Delete",
+            0xE047 => "Home",
+            0xE04F => "End",
+            0xE049 => "PageUp",
+            0xE051 => "PageDown",
+            0xE037 => "PrintScreen",
+            0x46 => "ScrollLock",
+            0xE045 => "Pause",
+            0x3A => "CapsLock",
+            0x45 => "NumLock",
+            0x01 => "Escape",
+            0x39 => "Space",
+            0x0F => "Tab",
+            0x1C => "Enter",
+            0x0E => "Backspace",
+            _ => $"Key 0x{code:X}"
+        };
     }
 
     private void AddButton_Click(object? sender, EventArgs e)
@@ -420,7 +565,7 @@ public class MainForm : Form
 
         _config.Add(new KeyRemapping { Keyboard = keyboard, From = from, To = to });
         RefreshGrid();
-        Log($"Added mapping: {keyboard} | {from} -> {to}");
+        Log($"Added: {keyboard} | {from} -> {to}");
     }
 
     private void RemoveButton_Click(object? sender, EventArgs e)
@@ -449,6 +594,8 @@ public class MainForm : Form
         try
         {
             Log("Starting remapping...");
+            Log($"Config has {_config.Count} mappings");
+
             _remapper = new InterceptionRemapper(_config);
             if (_remapper.Start())
             {
@@ -460,7 +607,7 @@ public class MainForm : Form
             }
             else
             {
-                Log("Failed to start remapping - interception_create_context returned null");
+                Log("Failed: interception_create_context returned null");
                 MessageBox.Show("Failed to start remapping. Make sure Interception driver is installed.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -521,7 +668,6 @@ public class MainForm : Form
 
                     process?.WaitForExit();
 
-                    // Copy interception.dll to exe folder
                     try
                     {
                         string dllSource = Directory.GetFiles(extractPath, "interception.dll", SearchOption.AllDirectories).FirstOrDefault() ?? "";
