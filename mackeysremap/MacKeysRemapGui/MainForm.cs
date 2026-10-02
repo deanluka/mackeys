@@ -16,12 +16,10 @@ public class MainForm : Form
     private Button _stopButton = null!;
     private Label _statusLabel = null!;
     private TextBox _logTextBox = null!;
-    private System.Windows.Forms.Timer _refreshTimer = null!;
     private Button _captureFromButton = null!;
     private Button _captureToButton = null!;
     private bool _capturingFrom = false;
     private bool _capturingTo = false;
-    private IntPtr _captureContext = IntPtr.Zero;
 
     private List<KeyRemapping> _config = new();
     private InterceptionRemapper? _remapper;
@@ -54,9 +52,6 @@ public class MainForm : Form
 
     [DllImport(InterceptionDll, CallingConvention = CallingConvention.Cdecl)]
     private static extern int interception_get_hardware_id(int device, IntPtr buffer, int size);
-
-    [DllImport(InterceptionDll, CallingConvention = CallingConvention.Cdecl)]
-    private static extern IntPtr interception_wait(IntPtr context);
 
     [StructLayout(LayoutKind.Sequential)]
     private struct KeyStroke
@@ -284,14 +279,6 @@ public class MainForm : Form
         }
         if (_fromKeySelector.Items.Count > 0) _fromKeySelector.SelectedIndex = 0;
         if (_toKeySelector.Items.Count > 1) _toKeySelector.SelectedIndex = 1;
-
-        // Refresh timer
-        _refreshTimer = new System.Windows.Forms.Timer
-        {
-            Interval = 3000
-        };
-        _refreshTimer.Tick += (s, e) => LoadKeyboards();
-        _refreshTimer.Start();
     }
 
     private void LoadConfig()
@@ -350,11 +337,11 @@ public class MainForm : Form
         try
         {
             int len = interception_get_hardware_id(deviceId, buffer, 1024);
-            return len > 0 ? Marshal.PtrToStringUni(buffer) ?? $"Keyboard {deviceId}" : $"Keyboard {deviceId}";
+            return len > 0 ? Marshal.PtrToStringUni(buffer) ?? $"Unknown {deviceId}" : $"Unknown {deviceId}";
         }
         catch
         {
-            return $"Keyboard {deviceId}";
+            return $"Unknown {deviceId}";
         }
         finally
         {
@@ -377,170 +364,22 @@ public class MainForm : Form
 
     private void CaptureFromButton_Click(object? sender, EventArgs e)
     {
-        _capturingFrom = true;
-        _captureFromButton.Text = "...";
-        _captureFromButton.Enabled = false;
-        Log("Press a key for SOURCE...");
-
-        Task.Run(() =>
+        using var dialog = new KeyCaptureDialog();
+        if (dialog.ShowDialog() == DialogResult.OK)
         {
-            try
-            {
-                _captureContext = interception_create_context();
-                if (_captureContext == IntPtr.Zero)
-                {
-                    BeginInvoke(() =>
-                    {
-                        _captureFromButton.Text = "Press";
-                        _captureFromButton.Enabled = true;
-                        Log("Failed to create capture context");
-                    });
-                    return;
-                }
-
-                interception_set_filter(_captureContext, INTERCEPTION_KEYBOARD, INTERCEPTION_FILTER_KEYBOARD_ALL);
-
-                var stroke = new KeyStroke();
-                while (_capturingFrom)
-                {
-                    for (int i = 1; i <= INTERCEPTION_MAX_KEYBOARD; i++)
-                    {
-                        if (interception_is_keyboard(i) != 1) continue;
-                        int result = interception_receive(_captureContext, i, ref stroke, 1);
-                        if (result == 0) continue;
-
-                        string keyName = GetKeyNameFromScanCode(stroke.Code);
-                        BeginInvoke(() =>
-                        {
-                            _fromKeySelector.SelectedItem = keyName;
-                            _captureFromButton.Text = "Press";
-                            _captureFromButton.Enabled = true;
-                            _capturingFrom = false;
-                            Log($"Captured source key: {keyName} (scan code: 0x{stroke.Code:X})");
-                        });
-                        return;
-                    }
-                    Thread.Sleep(10);
-                }
-            }
-            catch (Exception ex)
-            {
-                BeginInvoke(() =>
-                {
-                    _captureFromButton.Text = "Press";
-                    _captureFromButton.Enabled = true;
-                    _capturingFrom = false;
-                    Log($"Capture error: {ex.Message}");
-                });
-            }
-        });
+            _fromKeySelector.SelectedItem = dialog.CapturedKey;
+            Log($"Captured source: {dialog.CapturedKey}");
+        }
     }
 
     private void CaptureToButton_Click(object? sender, EventArgs e)
     {
-        _capturingTo = true;
-        _captureToButton.Text = "...";
-        _captureToButton.Enabled = false;
-        Log("Press a key for TARGET...");
-
-        Task.Run(() =>
+        using var dialog = new KeyCaptureDialog();
+        if (dialog.ShowDialog() == DialogResult.OK)
         {
-            try
-            {
-                if (_captureContext == IntPtr.Zero)
-                    _captureContext = interception_create_context();
-
-                if (_captureContext == IntPtr.Zero)
-                {
-                    BeginInvoke(() =>
-                    {
-                        _captureToButton.Text = "Press";
-                        _captureToButton.Enabled = true;
-                        Log("Failed to create capture context");
-                    });
-                    return;
-                }
-
-                interception_set_filter(_captureContext, INTERCEPTION_KEYBOARD, INTERCEPTION_FILTER_KEYBOARD_ALL);
-
-                var stroke = new KeyStroke();
-                while (_capturingTo)
-                {
-                    for (int i = 1; i <= INTERCEPTION_MAX_KEYBOARD; i++)
-                    {
-                        if (interception_is_keyboard(i) != 1) continue;
-                        int result = interception_receive(_captureContext, i, ref stroke, 1);
-                        if (result == 0) continue;
-
-                        string keyName = GetKeyNameFromScanCode(stroke.Code);
-                        BeginInvoke(() =>
-                        {
-                            _toKeySelector.SelectedItem = keyName;
-                            _captureToButton.Text = "Press";
-                            _captureToButton.Enabled = true;
-                            _capturingTo = false;
-                            Log($"Captured target key: {keyName} (scan code: 0x{stroke.Code:X})");
-                        });
-                        return;
-                    }
-                    Thread.Sleep(10);
-                }
-            }
-            catch (Exception ex)
-            {
-                BeginInvoke(() =>
-                {
-                    _captureToButton.Text = "Press";
-                    _captureToButton.Enabled = true;
-                    _capturingTo = false;
-                    Log($"Capture error: {ex.Message}");
-                });
-            }
-        });
-    }
-
-    private static string GetKeyNameFromScanCode(ushort code)
-    {
-        return code switch
-        {
-            0x38 => "LAlt",
-            0xE038 => "RAlt",
-            0x5B => "LWin",
-            0xE05C => "RWin",
-            0x1D => "LCtrl",
-            0xE01D => "RCtrl",
-            0x2A => "LShift",
-            0x36 => "RShift",
-            0x3B => "F1",
-            0x3C => "F2",
-            0x3D => "F3",
-            0x3E => "F4",
-            0x3F => "F5",
-            0x40 => "F6",
-            0x41 => "F7",
-            0x42 => "F8",
-            0x43 => "F9",
-            0x44 => "F10",
-            0x57 => "F11",
-            0x58 => "F12",
-            0xE052 => "Insert",
-            0xE053 => "Delete",
-            0xE047 => "Home",
-            0xE04F => "End",
-            0xE049 => "PageUp",
-            0xE051 => "PageDown",
-            0xE037 => "PrintScreen",
-            0x46 => "ScrollLock",
-            0xE045 => "Pause",
-            0x3A => "CapsLock",
-            0x45 => "NumLock",
-            0x01 => "Escape",
-            0x39 => "Space",
-            0x0F => "Tab",
-            0x1C => "Enter",
-            0x0E => "Backspace",
-            _ => $"Key 0x{code:X}"
-        };
+            _toKeySelector.SelectedItem = dialog.CapturedKey;
+            Log($"Captured target: {dialog.CapturedKey}");
+        }
     }
 
     private void AddButton_Click(object? sender, EventArgs e)
@@ -713,9 +552,161 @@ public class MainForm : Form
             return;
         }
         _remapper?.Stop();
-        _refreshTimer?.Stop();
         _trayIcon?.Dispose();
         base.OnFormClosing(e);
+    }
+}
+
+public class KeyCaptureDialog : Form
+{
+    public string CapturedKey { get; private set; } = "";
+    private IntPtr _context = IntPtr.Zero;
+    private bool _capturing = true;
+
+    public KeyCaptureDialog()
+    {
+        Text = "Press a key...";
+        Size = new Size(300, 150);
+        StartPosition = FormStartPosition.CenterParent;
+        FormBorderStyle = FormBorderStyle.FixedDialog;
+        MaximizeBox = false;
+        MinimizeBox = false;
+
+        var label = new Label
+        {
+            Text = "Press any key...",
+            Location = new Point(20, 20),
+            AutoSize = true,
+            Font = new Font(Font.FontFamily, 12)
+        };
+        Controls.Add(label);
+
+        var cancelButton = new Button
+        {
+            Text = "Cancel",
+            Location = new Point(100, 70),
+            Size = new Size(80, 30),
+            DialogResult = DialogResult.Cancel
+        };
+        Controls.Add(cancelButton);
+
+        Task.Run(() => CaptureLoop());
+    }
+
+    private void CaptureLoop()
+    {
+        try
+        {
+            _context = interception_create_context();
+            if (_context == IntPtr.Zero) return;
+
+            interception_set_filter(_context, INTERCEPTION_KEYBOARD, INTERCEPTION_FILTER_KEYBOARD_ALL);
+
+            var stroke = new KeyStroke();
+            while (_capturing)
+            {
+                for (int i = 1; i <= INTERCEPTION_MAX_KEYBOARD; i++)
+                {
+                    if (interception_is_keyboard(i) != 1) continue;
+                    int result = interception_receive(_context, i, ref stroke, 1);
+                    if (result == 0) continue;
+
+                    string keyName = GetKeyNameFromScanCode(stroke.Code);
+                    BeginInvoke(() =>
+                    {
+                        CapturedKey = keyName;
+                        DialogResult = DialogResult.OK;
+                        Close();
+                    });
+                    return;
+                }
+                Thread.Sleep(10);
+            }
+        }
+        catch { }
+    }
+
+    private static string GetKeyNameFromScanCode(ushort code)
+    {
+        return code switch
+        {
+            0x38 => "LAlt",
+            0xE038 => "RAlt",
+            0x5B => "LWin",
+            0xE05C => "RWin",
+            0x1D => "LCtrl",
+            0xE01D => "RCtrl",
+            0x2A => "LShift",
+            0x36 => "RShift",
+            0x3B => "F1",
+            0x3C => "F2",
+            0x3D => "F3",
+            0x3E => "F4",
+            0x3F => "F5",
+            0x40 => "F6",
+            0x41 => "F7",
+            0x42 => "F8",
+            0x43 => "F9",
+            0x44 => "F10",
+            0x57 => "F11",
+            0x58 => "F12",
+            0xE052 => "Insert",
+            0xE053 => "Delete",
+            0xE047 => "Home",
+            0xE04F => "End",
+            0xE049 => "PageUp",
+            0xE051 => "PageDown",
+            0xE037 => "PrintScreen",
+            0x46 => "ScrollLock",
+            0xE045 => "Pause",
+            0x3A => "CapsLock",
+            0x45 => "NumLock",
+            0x01 => "Escape",
+            0x39 => "Space",
+            0x0F => "Tab",
+            0x1C => "Enter",
+            0x0E => "Backspace",
+            _ => $"Key 0x{code:X}"
+        };
+    }
+
+    protected override void OnFormClosing(FormClosingEventArgs e)
+    {
+        _capturing = false;
+        if (_context != IntPtr.Zero)
+        {
+            interception_destroy_context(_context);
+            _context = IntPtr.Zero;
+        }
+        base.OnFormClosing(e);
+    }
+
+    private const string InterceptionDll = "interception.dll";
+    private const int INTERCEPTION_KEYBOARD = 1;
+    private const int INTERCEPTION_MAX_KEYBOARD = 10;
+    private const ushort INTERCEPTION_FILTER_KEYBOARD_ALL = 0xFFFF;
+
+    [DllImport(InterceptionDll, CallingConvention = CallingConvention.Cdecl)]
+    private static extern IntPtr interception_create_context();
+
+    [DllImport(InterceptionDll, CallingConvention = CallingConvention.Cdecl)]
+    private static extern void interception_destroy_context(IntPtr context);
+
+    [DllImport(InterceptionDll, CallingConvention = CallingConvention.Cdecl)]
+    private static extern int interception_receive(IntPtr context, int device, ref KeyStroke stroke, int n);
+
+    [DllImport(InterceptionDll, CallingConvention = CallingConvention.Cdecl)]
+    private static extern void interception_set_filter(IntPtr context, int predicate, ushort filter);
+
+    [DllImport(InterceptionDll, CallingConvention = CallingConvention.Cdecl)]
+    private static extern int interception_is_keyboard(int device);
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct KeyStroke
+    {
+        public ushort Code;
+        public ushort State;
+        public uint Information;
     }
 }
 
