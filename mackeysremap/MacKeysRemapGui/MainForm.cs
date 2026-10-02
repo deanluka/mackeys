@@ -31,26 +31,44 @@ public class MainForm : Form
         LoadConfig();
         LoadKeyboards();
 
-        // Check if started from interactive double-click (not from autostart)
         bool isInteractive = Environment.GetCommandLineArgs().Length == 1;
         bool isFirstRun = !File.Exists(ConfigManager.GetConfigPath());
 
-        // Show window on first run or interactive launch; go to tray on autostart
         bool showWindow = isFirstRun || isInteractive;
         _trayIcon = new TrayIcon(this, showWindow);
 
-        if (isFirstRun)
+        string? existingAutoStart = null;
+        try
         {
-            try
-            {
-                using var key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(
-                    @"Software\Microsoft\Windows\CurrentVersion\Run");
-                key.SetValue("MacKeysRemap", Application.ExecutablePath);
-            }
-            catch { }
+            using var key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(
+                @"Software\Microsoft\Windows\CurrentVersion\Run");
+            existingAutoStart = key.GetValue("MacKeysRemap") as string;
+            key.SetValue("MacKeysRemap", Application.ExecutablePath);
         }
+        catch { }
 
-        Log($"App started (interactive: {isInteractive}, firstRun: {isFirstRun})");
+        Load += async (s, e) =>
+        {
+            Log($"App started (interactive: {isInteractive}, firstRun: {isFirstRun}, showWindow: {showWindow})");
+            if (existingAutoStart != null && !string.Equals(existingAutoStart, Application.ExecutablePath, StringComparison.OrdinalIgnoreCase))
+            {
+                Log($"[Autostart] Registry path updated: '{existingAutoStart}' -> '{Application.ExecutablePath}' (was stale).");
+            }
+            else
+            {
+                Log($"[Autostart] Registry path confirmed -> '{Application.ExecutablePath}'.");
+            }
+
+            try { await Task.Delay(300, CancellationToken.None); } catch { }
+            BeginInvoke(() =>
+            {
+                if (_startButton != null && !_startButton.IsDisposed && _startButton.Enabled)
+                {
+                    Log("[AutoStart] Launching remapping engine automatically (config has rules)...");
+                    _startButton.PerformClick();
+                }
+            });
+        };
     }
 
     private void InitializeComponent()
@@ -600,12 +618,44 @@ public class MainForm : Form
         }
     }
 
+    private const int LogMaxLines = 3000;
+    private const int LogKeepLines = 2500;
+
     private void Log(string message)
     {
         string timestamp = DateTime.Now.ToString("HH:mm:ss");
         if (_logTextBox != null && !_logTextBox.IsDisposed)
         {
             _logTextBox.AppendText($"[{timestamp}] {message}{Environment.NewLine}");
+
+            string? txt = null;
+            int newlines = -1;
+            try
+            {
+                txt = _logTextBox.Text;
+                newlines = 0;
+                for (int i = txt.Length - 1; i >= 0 && newlines <= LogMaxLines; i--)
+                    if (txt[i] == '\n') newlines++;
+            }
+            catch { newlines = -1; }
+
+            if (newlines > LogMaxLines)
+            {
+                int trimStart = 0;
+                int passed = 0;
+                int linesToCut = newlines - LogKeepLines;
+                for (int i = 0; i < txt!.Length && passed < linesToCut; i++)
+                {
+                    if (txt[i] == '\n') { passed++; trimStart = i + 1; }
+                }
+                if (trimStart > 0 && trimStart < txt.Length)
+                {
+                    _logTextBox.Select(0, trimStart);
+                    _logTextBox.SelectedText = "";
+                    _logTextBox.Select(_logTextBox.TextLength, 0);
+                    _logTextBox.ScrollToCaret();
+                }
+            }
         }
     }
 
