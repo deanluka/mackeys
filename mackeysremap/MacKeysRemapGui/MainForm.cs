@@ -15,7 +15,12 @@ public class MainForm : Form
     private Button _startButton = null!;
     private Button _stopButton = null!;
     private Label _statusLabel = null!;
+    private TextBox _logTextBox = null!;
     private System.Windows.Forms.Timer _refreshTimer = null!;
+    private Button _captureFromButton = null!;
+    private Button _captureToButton = null!;
+    private bool _capturingFrom = false;
+    private bool _capturingTo = false;
 
     private List<KeyRemapping> _config = new();
     private InterceptionRemapper? _remapper;
@@ -66,12 +71,9 @@ public class MainForm : Form
         LoadConfig();
         LoadKeyboards();
 
-        // First run: no config file existed before; show window
-        // Subsequent runs: config exists; go straight to tray
         bool isFirstRun = !File.Exists(ConfigManager.GetConfigPath());
         _trayIcon = new TrayIcon(this, isFirstRun);
 
-        // Enable auto-start on first run
         if (isFirstRun)
         {
             try
@@ -83,17 +85,16 @@ public class MainForm : Form
             catch { }
         }
 
-        // Auto-start mapping disabled - was causing crash on startup
-        // TODO: Fix interception_wait issue first, then re-enable
+        Log("App started");
     }
 
     private void InitializeComponent()
     {
         Text = "MacKeysRemap - Per-Device Key Remapper";
-        Size = new Size(800, 600);
+        Size = new Size(900, 700);
         StartPosition = FormStartPosition.CenterScreen;
 
-        // Keyboard selector (for adding mappings)
+        // Keyboard selector
         var keyboardLabel = new Label
         {
             Text = "Add mapping for:",
@@ -105,16 +106,15 @@ public class MainForm : Form
         _keyboardSelector = new ComboBox
         {
             Location = new Point(150, 17),
-            Size = new Size(250, 25),
-            DropDownStyle = ComboBoxStyle.DropDownList
+            Size = new Size(300, 25),
+            DropDownStyle = ComboBoxStyle.DropDown
         };
         Controls.Add(_keyboardSelector);
 
-        // Refresh button
         var refreshButton = new Button
         {
             Text = "Refresh",
-            Location = new Point(420, 16),
+            Location = new Point(470, 16),
             Size = new Size(80, 25)
         };
         refreshButton.Click += (s, e) => LoadKeyboards();
@@ -137,29 +137,47 @@ public class MainForm : Form
         };
         Controls.Add(_fromKeySelector);
 
+        _captureFromButton = new Button
+        {
+            Text = "Press Key",
+            Location = new Point(360, 56),
+            Size = new Size(80, 25)
+        };
+        _captureFromButton.Click += CaptureFromButton_Click;
+        Controls.Add(_captureFromButton);
+
         // To key
         var toLabel = new Label
         {
             Text = "To Key:",
-            Location = new Point(370, 60),
+            Location = new Point(460, 60),
             AutoSize = true
         };
         Controls.Add(toLabel);
 
         _toKeySelector = new ComboBox
         {
-            Location = new Point(450, 57),
+            Location = new Point(540, 57),
             Size = new Size(200, 25),
             DropDownStyle = ComboBoxStyle.DropDownList
         };
         Controls.Add(_toKeySelector);
 
+        _captureToButton = new Button
+        {
+            Text = "Press Key",
+            Location = new Point(750, 56),
+            Size = new Size(80, 25)
+        };
+        _captureToButton.Click += CaptureToButton_Click;
+        Controls.Add(_captureToButton);
+
         // Add button
         _addButton = new Button
         {
             Text = "Add",
-            Location = new Point(670, 56),
-            Size = new Size(80, 25)
+            Location = new Point(850, 56),
+            Size = new Size(60, 25)
         };
         _addButton.Click += AddButton_Click;
         Controls.Add(_addButton);
@@ -168,7 +186,7 @@ public class MainForm : Form
         _remappingGrid = new DataGridView
         {
             Location = new Point(20, 100),
-            Size = new Size(740, 300),
+            Size = new Size(840, 250),
             AllowUserToAddRows = false,
             AllowUserToDeleteRows = false,
             ReadOnly = true,
@@ -184,7 +202,7 @@ public class MainForm : Form
         _removeButton = new Button
         {
             Text = "Remove Selected",
-            Location = new Point(20, 410),
+            Location = new Point(20, 360),
             Size = new Size(120, 30)
         };
         _removeButton.Click += RemoveButton_Click;
@@ -194,7 +212,7 @@ public class MainForm : Form
         _saveButton = new Button
         {
             Text = "Save Config",
-            Location = new Point(160, 410),
+            Location = new Point(160, 360),
             Size = new Size(100, 30)
         };
         _saveButton.Click += SaveButton_Click;
@@ -204,7 +222,7 @@ public class MainForm : Form
         _startButton = new Button
         {
             Text = "Start Remapping",
-            Location = new Point(500, 410),
+            Location = new Point(500, 360),
             Size = new Size(120, 30),
             BackColor = Color.LightGreen
         };
@@ -215,7 +233,7 @@ public class MainForm : Form
         _stopButton = new Button
         {
             Text = "Stop Remapping",
-            Location = new Point(640, 410),
+            Location = new Point(640, 360),
             Size = new Size(120, 30),
             BackColor = Color.LightCoral,
             Enabled = false
@@ -227,17 +245,39 @@ public class MainForm : Form
         _statusLabel = new Label
         {
             Text = "Status: Stopped",
-            Location = new Point(20, 460),
+            Location = new Point(20, 410),
             AutoSize = true,
             Font = new Font(Font.FontFamily, 10, FontStyle.Bold)
         };
         Controls.Add(_statusLabel);
 
+        // Log textbox
+        var logLabel = new Label
+        {
+            Text = "Log:",
+            Location = new Point(20, 450),
+            AutoSize = true
+        };
+        Controls.Add(logLabel);
+
+        _logTextBox = new TextBox
+        {
+            Location = new Point(20, 475),
+            Size = new Size(840, 150),
+            Multiline = true,
+            ScrollBars = ScrollBars.Vertical,
+            ReadOnly = true,
+            BackColor = Color.Black,
+            ForeColor = Color.LightGreen,
+            Font = new Font("Consolas", 9)
+        };
+        Controls.Add(_logTextBox);
+
         // Config path label
         var configPathLabel = new Label
         {
             Text = $"Config: {ConfigManager.GetConfigPath()}",
-            Location = new Point(20, 500),
+            Location = new Point(20, 635),
             AutoSize = true,
             ForeColor = Color.Gray
         };
@@ -255,7 +295,7 @@ public class MainForm : Form
         // Refresh timer
         _refreshTimer = new System.Windows.Forms.Timer
         {
-            Interval = 2000
+            Interval = 3000
         };
         _refreshTimer.Tick += (s, e) => LoadKeyboards();
         _refreshTimer.Start();
@@ -279,6 +319,7 @@ public class MainForm : Form
                 {
                     string name = GetKeyboardName(i);
                     _keyboardSelector.Items.Add(new KeyboardItem { Id = i, Name = name });
+                    Log($"Found keyboard {i}: {name}");
                 }
             }
         }
@@ -341,14 +382,35 @@ public class MainForm : Form
         }
     }
 
+    private void CaptureFromButton_Click(object? sender, EventArgs e)
+    {
+        _capturingFrom = true;
+        _captureFromButton.Text = "Press a key...";
+        _captureFromButton.Enabled = false;
+        Log("Press a key for SOURCE...");
+    }
+
+    private void CaptureToButton_Click(object? sender, EventArgs e)
+    {
+        _capturingTo = true;
+        _captureToButton.Text = "Press a key...";
+        _captureToButton.Enabled = false;
+        Log("Press a key for TARGET...");
+    }
+
     private void AddButton_Click(object? sender, EventArgs e)
     {
-        if (_keyboardSelector.SelectedItem is not KeyboardItem item) return;
         if (_fromKeySelector.SelectedItem == null || _toKeySelector.SelectedItem == null) return;
 
-        string keyboard = item.Name;
+        string keyboard = _keyboardSelector.Text;
         string from = _fromKeySelector.SelectedItem.ToString()!;
         string to = _toKeySelector.SelectedItem.ToString()!;
+
+        if (string.IsNullOrEmpty(keyboard))
+        {
+            MessageBox.Show("Please enter or select a keyboard name.", "Invalid", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
 
         if (from == to)
         {
@@ -358,6 +420,7 @@ public class MainForm : Form
 
         _config.Add(new KeyRemapping { Keyboard = keyboard, From = from, To = to });
         RefreshGrid();
+        Log($"Added mapping: {keyboard} | {from} -> {to}");
     }
 
     private void RemoveButton_Click(object? sender, EventArgs e)
@@ -375,6 +438,7 @@ public class MainForm : Form
     private void SaveButton_Click(object? sender, EventArgs e)
     {
         ConfigManager.Save(_config);
+        Log("Config saved");
         MessageBox.Show("Config saved!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
     }
 
@@ -384,6 +448,7 @@ public class MainForm : Form
 
         try
         {
+            Log("Starting remapping...");
             _remapper = new InterceptionRemapper(_config);
             if (_remapper.Start())
             {
@@ -391,14 +456,18 @@ public class MainForm : Form
                 _stopButton.Enabled = true;
                 _statusLabel.Text = "Status: Running";
                 _statusLabel.ForeColor = Color.Green;
+                Log("Remapping started successfully");
             }
             else
             {
+                Log("Failed to start remapping - interception_create_context returned null");
                 MessageBox.Show("Failed to start remapping. Make sure Interception driver is installed.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
         catch (Exception ex)
         {
+            Log($"CRASH: {ex.GetType().Name}: {ex.Message}");
+            Log($"Stack: {ex.StackTrace}");
             MessageBox.Show($"Crash on start:\n\n{ex.GetType().Name}: {ex.Message}\n\n{ex.StackTrace}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
@@ -412,6 +481,7 @@ public class MainForm : Form
         _stopButton.Enabled = false;
         _statusLabel.Text = "Status: Stopped";
         _statusLabel.ForeColor = Color.Black;
+        Log("Remapping stopped");
     }
 
     private void InstallDriver()
@@ -430,7 +500,6 @@ public class MainForm : Form
 
             System.IO.Compression.ZipFile.ExtractToDirectory(zipPath, extractPath, true);
 
-            // Find installer recursively (it may be in a subfolder)
             string installerPath = Directory.GetFiles(extractPath, "install-interception.exe", SearchOption.AllDirectories).FirstOrDefault() ?? "";
             if (!string.IsNullOrEmpty(installerPath))
             {
@@ -460,9 +529,13 @@ public class MainForm : Form
                         {
                             string dllDest = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "interception.dll");
                             File.Copy(dllSource, dllDest, true);
+                            Log("Copied interception.dll to exe folder");
                         }
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        Log($"Failed to copy DLL: {ex.Message}");
+                    }
 
                     MessageBox.Show(
                         "Driver installed.\n\nPlease reboot your computer for changes to take effect.",
@@ -474,8 +547,15 @@ public class MainForm : Form
         }
         catch (Exception ex)
         {
+            Log($"Driver install failed: {ex.Message}");
             MessageBox.Show($"Failed to install driver: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
+    }
+
+    private void Log(string message)
+    {
+        string timestamp = DateTime.Now.ToString("HH:mm:ss");
+        _logTextBox?.AppendText($"[{timestamp}] {message}{Environment.NewLine}");
     }
 
     protected override void OnFormClosing(FormClosingEventArgs e)
