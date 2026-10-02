@@ -83,14 +83,8 @@ public class MainForm : Form
             catch { }
         }
 
-        // Auto-start mapping if config has remappings
-        if (_config.Count > 0 && File.Exists(ConfigManager.GetConfigPath()))
-        {
-            Task.Delay(1000).ContinueWith(_ =>
-            {
-                BeginInvoke(() => StartButton_Click(null, EventArgs.Empty));
-            });
-        }
+        // Auto-start mapping disabled - was causing crash on startup
+        // TODO: Fix interception_wait issue first, then re-enable
     }
 
     private void InitializeComponent()
