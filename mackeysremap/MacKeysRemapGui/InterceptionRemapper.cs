@@ -265,16 +265,22 @@ public class InterceptionRemapper : IDisposable
                 string.Equals(remap.Keyboard, "All", StringComparison.OrdinalIgnoreCase) ||
                 string.Equals(remap.Keyboard, "All Keyboards", StringComparison.OrdinalIgnoreCase);
 
-            // For media keys, check if LastActiveDevice matches the rule's scope
-            if (!keyboardIsGlobal && isMediaVK && isDown)
+            // For ALL keys (not just media), check if LastActiveDevice matches the rule's scope
+            if (!keyboardIsGlobal)
             {
                 bool deviceMatches = MatchesKeyboard(remap.Keyboard, 0, "", LastActiveDevice);
                 if (!deviceMatches)
                 {
-                    OnLog?.Invoke($"[LL-SKIP] MEDIA rule '{remap.Keyboard}' {remap.From}->{remap.To} — LastActiveDevice='{LastActiveDevice}' does not match scope. Passing through.");
+                    if (isDown && EnableVerboseDebugLogging)
+                    {
+                        OnLog?.Invoke($"[LL-SKIP] Rule '{remap.Keyboard}' {remap.From}->{remap.To} — LastActiveDevice='{LastActiveDevice}' does not match scope. Passing through.");
+                    }
                     continue;
                 }
-                OnLog?.Invoke($"[LL-MATCH] MEDIA rule '{remap.Keyboard}' {remap.From}->{remap.To} — LastActiveDevice='{LastActiveDevice}' matches scope.");
+                if (isDown && EnableVerboseDebugLogging)
+                {
+                    OnLog?.Invoke($"[LL-MATCH] Rule '{remap.Keyboard}' {remap.From}->{remap.To} — LastActiveDevice='{LastActiveDevice}' matches scope.");
+                }
             }
 
             if (!string.Equals(remap.From, fromKeyNameByVK, StringComparison.OrdinalIgnoreCase))
