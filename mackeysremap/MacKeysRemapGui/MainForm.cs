@@ -25,7 +25,7 @@ public class MainForm : Form
     // Interception P/Invoke
     private const string InterceptionDll = "interception.dll";
     private const int INTERCEPTION_KEYBOARD = 1;
-    private const int INTERCEPTION_MAX_KEYBOARD = 1;
+    private const int INTERCEPTION_MAX_KEYBOARD = 10;
     private const ushort INTERCEPTION_FILTER_KEYBOARD_ALL = 0xFFFF;
 
     [DllImport(InterceptionDll, CallingConvention = CallingConvention.Cdecl)]
@@ -48,6 +48,9 @@ public class MainForm : Form
 
     [DllImport(InterceptionDll, CallingConvention = CallingConvention.Cdecl)]
     private static extern int interception_get_hardware_id(int device, IntPtr buffer, int size);
+
+    [DllImport(InterceptionDll, CallingConvention = CallingConvention.Cdecl)]
+    private static extern IntPtr interception_wait(IntPtr context);
 
     [StructLayout(LayoutKind.Sequential)]
     private struct KeyStroke
@@ -78,6 +81,15 @@ public class MainForm : Form
                 key.SetValue("MacKeysRemap", Application.ExecutablePath);
             }
             catch { }
+        }
+
+        // Auto-start mapping if config has remappings
+        if (_config.Count > 0 && File.Exists(ConfigManager.GetConfigPath()))
+        {
+            Task.Delay(1000).ContinueWith(_ =>
+            {
+                BeginInvoke(() => StartButton_Click(null, EventArgs.Empty));
+            });
         }
     }
 
@@ -310,7 +322,7 @@ public class MainForm : Form
         try
         {
             int len = interception_get_hardware_id(deviceId, buffer, 1024);
-            return len > 0 ? Marshal.PtrToStringAnsi(buffer) ?? $"Keyboard {deviceId}" : $"Keyboard {deviceId}";
+            return len > 0 ? Marshal.PtrToStringUni(buffer) ?? $"Keyboard {deviceId}" : $"Keyboard {deviceId}";
         }
         catch
         {
@@ -438,6 +450,18 @@ public class MainForm : Form
                     });
 
                     process?.WaitForExit();
+
+                    // Copy interception.dll to exe folder
+                    try
+                    {
+                        string dllSource = Directory.GetFiles(extractPath, "interception.dll", SearchOption.AllDirectories).FirstOrDefault() ?? "";
+                        if (!string.IsNullOrEmpty(dllSource))
+                        {
+                            string dllDest = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "interception.dll");
+                            File.Copy(dllSource, dllDest, true);
+                        }
+                    }
+                    catch { }
 
                     MessageBox.Show(
                         "Driver installed.\n\nPlease reboot your computer for changes to take effect.",

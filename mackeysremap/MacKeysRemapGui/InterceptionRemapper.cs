@@ -6,7 +6,7 @@ public class InterceptionRemapper
 {
     private const string InterceptionDll = "interception.dll";
     private const int INTERCEPTION_KEYBOARD = 1;
-    private const int INTERCEPTION_MAX_KEYBOARD = 1;
+    private const int INTERCEPTION_MAX_KEYBOARD = 10;
     private const ushort INTERCEPTION_FILTER_KEYBOARD_ALL = 0xFFFF;
 
     [DllImport(InterceptionDll, CallingConvention = CallingConvention.Cdecl)]
@@ -29,6 +29,9 @@ public class InterceptionRemapper
 
     [DllImport(InterceptionDll, CallingConvention = CallingConvention.Cdecl)]
     private static extern int interception_get_hardware_id(int device, IntPtr buffer, int size);
+
+    [DllImport(InterceptionDll, CallingConvention = CallingConvention.Cdecl)]
+    private static extern IntPtr interception_wait(IntPtr context);
 
     [StructLayout(LayoutKind.Sequential)]
     private struct KeyStroke
@@ -77,31 +80,33 @@ public class InterceptionRemapper
 
         while (!ct.IsCancellationRequested)
         {
-            for (int i = 1; i <= INTERCEPTION_MAX_KEYBOARD; i++)
+            // Wait for any device to have input ready
+            IntPtr device = interception_wait(_context);
+            if (device == IntPtr.Zero) continue;
+
+            int deviceId = device.ToInt32();
+
+            // Check if this is a keyboard
+            if (interception_is_keyboard(deviceId) != 1) continue;
+
+            int result = interception_receive(_context, deviceId, ref stroke, 1);
+            if (result == 0) continue;
+
+            // Get keyboard name for this device
+            string keyboardName = GetKeyboardName(deviceId);
+
+            // Apply remapping for this specific keyboard
+            foreach (var remap in _config)
             {
-                if (interception_is_keyboard(i) != 1) continue;
-
-                int result = interception_receive(_context, i, ref stroke, 1);
-                if (result == 0) continue;
-
-                // Get keyboard name for this device
-                string keyboardName = GetKeyboardName(i);
-
-                // Apply remapping for this specific keyboard
-                foreach (var remap in _config)
+                if (remap.Keyboard != keyboardName) continue;
+                if (GetScanCode(remap.From) == stroke.Code)
                 {
-                    if (remap.Keyboard != keyboardName) continue;
-                    if (GetScanCode(remap.From) == stroke.Code)
-                    {
-                        stroke.Code = GetScanCode(remap.To);
-                        break;
-                    }
+                    stroke.Code = GetScanCode(remap.To);
+                    break;
                 }
-
-                interception_send(_context, i, ref stroke, 1);
             }
 
-            Thread.Sleep(1);
+            interception_send(_context, deviceId, ref stroke, 1);
         }
     }
 
@@ -111,7 +116,7 @@ public class InterceptionRemapper
         try
         {
             int len = interception_get_hardware_id(deviceId, buffer, 1024);
-            return len > 0 ? Marshal.PtrToStringAnsi(buffer) ?? $"Keyboard {deviceId}" : $"Keyboard {deviceId}";
+            return len > 0 ? Marshal.PtrToStringUni(buffer) ?? $"Keyboard {deviceId}" : $"Keyboard {deviceId}";
         }
         catch
         {
