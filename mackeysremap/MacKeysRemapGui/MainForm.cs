@@ -18,8 +18,6 @@ public class MainForm : Form
     private TextBox _logTextBox = null!;
     private Button _captureFromButton = null!;
     private Button _captureToButton = null!;
-    private bool _capturingFrom = false;
-    private bool _capturingTo = false;
 
     private List<KeyRemapping> _config = new();
     private InterceptionRemapper? _remapper;
@@ -67,8 +65,13 @@ public class MainForm : Form
         LoadConfig();
         LoadKeyboards();
 
+        // Check if started from interactive double-click (not from autostart)
+        bool isInteractive = Environment.GetCommandLineArgs().Length == 1;
         bool isFirstRun = !File.Exists(ConfigManager.GetConfigPath());
-        _trayIcon = new TrayIcon(this, isFirstRun);
+
+        // Show window on first run or interactive launch; go to tray on autostart
+        bool showWindow = isFirstRun || isInteractive;
+        _trayIcon = new TrayIcon(this, showWindow);
 
         if (isFirstRun)
         {
@@ -81,7 +84,7 @@ public class MainForm : Form
             catch { }
         }
 
-        Log("App started");
+        Log($"App started (interactive: {isInteractive}, firstRun: {isFirstRun})");
     }
 
     private void InitializeComponent()

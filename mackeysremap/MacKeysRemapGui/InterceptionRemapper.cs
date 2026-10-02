@@ -30,9 +30,6 @@ public class InterceptionRemapper
     [DllImport(InterceptionDll, CallingConvention = CallingConvention.Cdecl)]
     private static extern int interception_get_hardware_id(int device, IntPtr buffer, int size);
 
-    [DllImport(InterceptionDll, CallingConvention = CallingConvention.Cdecl)]
-    private static extern IntPtr interception_wait(IntPtr context);
-
     [StructLayout(LayoutKind.Sequential)]
     private struct KeyStroke
     {
@@ -56,7 +53,14 @@ public class InterceptionRemapper
         _context = interception_create_context();
         if (_context == IntPtr.Zero) return false;
 
-        interception_set_filter(_context, INTERCEPTION_KEYBOARD, INTERCEPTION_FILTER_KEYBOARD_ALL);
+        // Set filter for all keyboards
+        for (int i = 1; i <= INTERCEPTION_MAX_KEYBOARD; i++)
+        {
+            if (interception_is_keyboard(i) == 1)
+            {
+                interception_set_filter(_context, i, INTERCEPTION_FILTER_KEYBOARD_ALL);
+            }
+        }
 
         _cts = new CancellationTokenSource();
         _remapTask = Task.Run(() => RemapLoop(_cts.Token));
@@ -80,33 +84,37 @@ public class InterceptionRemapper
 
         while (!ct.IsCancellationRequested)
         {
-            // Wait for any device to have input ready
-            IntPtr device = interception_wait(_context);
-            if (device == IntPtr.Zero) continue;
+            bool gotInput = false;
 
-            int deviceId = device.ToInt32();
-
-            // Check if this is a keyboard
-            if (interception_is_keyboard(deviceId) != 1) continue;
-
-            int result = interception_receive(_context, deviceId, ref stroke, 1);
-            if (result == 0) continue;
-
-            // Get keyboard name for this device
-            string keyboardName = GetKeyboardName(deviceId);
-
-            // Apply remapping for this specific keyboard
-            foreach (var remap in _config)
+            for (int i = 1; i <= INTERCEPTION_MAX_KEYBOARD; i++)
             {
-                if (remap.Keyboard != keyboardName) continue;
-                if (GetScanCode(remap.From) == stroke.Code)
+                if (interception_is_keyboard(i) != 1) continue;
+
+                int result = interception_receive(_context, i, ref stroke, 1);
+                if (result == 0) continue;
+
+                gotInput = true;
+                string keyboardName = GetKeyboardName(i);
+
+                // Apply remapping for this specific keyboard
+                foreach (var remap in _config)
                 {
-                    stroke.Code = GetScanCode(remap.To);
-                    break;
+                    if (remap.Keyboard != keyboardName && !string.IsNullOrEmpty(remap.Keyboard)) continue;
+
+                    if (GetScanCode(remap.From) == stroke.Code)
+                    {
+                        stroke.Code = GetScanCode(remap.To);
+                        break;
+                    }
                 }
+
+                interception_send(_context, i, ref stroke, 1);
             }
 
-            interception_send(_context, deviceId, ref stroke, 1);
+            if (!gotInput)
+            {
+                Thread.Sleep(1);
+            }
         }
     }
 
