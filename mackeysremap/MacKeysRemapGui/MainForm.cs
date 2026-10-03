@@ -73,7 +73,7 @@ public class MainForm : Form
 
     private void InitializeComponent()
     {
-        Text = "MacKeysRemap - Per-Device Key Remapper";
+        Text = "MacKeysRemap v1.0 - Per-Device Key Remapper";
         Size = new Size(800, 650);
         StartPosition = FormStartPosition.CenterScreen;
 
@@ -547,24 +547,22 @@ public class MainForm : Form
         try
         {
             string url = "https://github.com/oblitum/Interception/releases/latest/download/Interception.zip";
-            string tempPath = Path.GetTempPath();
-            string zipPath = Path.Combine(tempPath, "Interception.zip");
-            string extractPath = Path.Combine(tempPath, "Interception");
+            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            string zipPath = Path.Combine(baseDir, "Interception.zip");
 
+            // Interception zip already contains Interception folder — extract directly to baseDir
             Log("Downloading Interception driver package...");
             using (var client = new System.Net.Http.HttpClient())
             {
                 var bytes = await client.GetByteArrayAsync(url);
                 await File.WriteAllBytesAsync(zipPath, bytes);
             }
+            Log("Download complete. Extracting...");
 
-            if (Directory.Exists(extractPath))
-            {
-                Directory.Delete(extractPath, true);
-            }
-            System.IO.Compression.ZipFile.ExtractToDirectory(zipPath, extractPath, true);
+            System.IO.Compression.ZipFile.ExtractToDirectory(zipPath, baseDir, true);
+            Log("Extraction complete.");
 
-            string installerPath = Directory.GetFiles(extractPath, "install-interception.exe", SearchOption.AllDirectories).FirstOrDefault() ?? "";
+            string installerPath = Directory.GetFiles(baseDir, "install-interception.exe", SearchOption.AllDirectories).FirstOrDefault() ?? "";
             if (!string.IsNullOrEmpty(installerPath))
             {
                 var result = MessageBox.Show(
@@ -575,6 +573,7 @@ public class MainForm : Form
 
                 if (result == DialogResult.Yes)
                 {
+                    Log("Installing driver...");
                     var process = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                     {
                         FileName = installerPath,
@@ -584,16 +583,17 @@ public class MainForm : Form
                     });
 
                     process?.WaitForExit();
+                    Log("Driver installer finished.");
 
                     try
                     {
-                        string dllSource = Directory.GetFiles(extractPath, "interception.dll", SearchOption.AllDirectories)
+                        string dllSource = Directory.GetFiles(baseDir, "interception.dll", SearchOption.AllDirectories)
                             .FirstOrDefault(p => p.Contains("x64", StringComparison.OrdinalIgnoreCase))
-                            ?? Directory.GetFiles(extractPath, "interception.dll", SearchOption.AllDirectories).FirstOrDefault() ?? "";
+                            ?? Directory.GetFiles(baseDir, "interception.dll", SearchOption.AllDirectories).FirstOrDefault() ?? "";
 
                         if (!string.IsNullOrEmpty(dllSource))
                         {
-                            string dllDest = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "interception.dll");
+                            string dllDest = Path.Combine(baseDir, "interception.dll");
                             File.Copy(dllSource, dllDest, true);
                             Log("Copied interception.dll to application directory.");
                         }
@@ -608,6 +608,16 @@ public class MainForm : Form
                         "Reboot Required",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Information);
+
+                    // Wait 2 seconds then reopen app
+                    Log("Reopening app in 2 seconds...");
+                    await Task.Delay(2000);
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = Application.ExecutablePath,
+                        UseShellExecute = true
+                    });
+                    Application.Exit();
                 }
             }
         }
