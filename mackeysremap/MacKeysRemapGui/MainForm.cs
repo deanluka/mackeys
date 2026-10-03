@@ -43,12 +43,26 @@ public class MainForm : Form
         TaskSchedulerHelper.EnsureTaskExists();
 
         // Load keyboards after window is shown
-        Load += (s, e) =>
+        Load += async (s, e) =>
         {
             Log($"App started (taskScheduler: {isTaskScheduler}, firstRun: {isFirstRun})");
             if (!isTaskScheduler)
             {
                 LoadKeyboards();
+            }
+
+            // Auto-start mapping if config has rules
+            if (_config.Count > 0)
+            {
+                await Task.Delay(500);
+                BeginInvoke(() =>
+                {
+                    if (_startButton != null && !_startButton.IsDisposed && _startButton.Enabled)
+                    {
+                        Log("[AutoStart] Launching remapping engine automatically (config has rules)...");
+                        _startButton.PerformClick();
+                    }
+                });
             }
         };
     }
