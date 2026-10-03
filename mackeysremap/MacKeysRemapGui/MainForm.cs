@@ -608,16 +608,6 @@ public class MainForm : Form
                         "Reboot Required",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Information);
-
-                    // Wait 2 seconds then reopen app
-                    Log("Reopening app in 2 seconds...");
-                    await Task.Delay(2000);
-                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                    {
-                        FileName = Application.ExecutablePath,
-                        UseShellExecute = true
-                    });
-                    Application.Exit();
                 }
             }
         }
