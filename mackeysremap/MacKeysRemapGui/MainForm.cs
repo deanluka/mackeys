@@ -15,6 +15,7 @@ public class MainForm : Form
     private Button _startButton = null!;
     private Button _stopButton = null!;
     private Button _exitButton = null!;
+    private Button _installDriverButton = null!;
     private Label _statusLabel = null!;
     private TextBox _logTextBox = null!;
     private Button _captureFromButton = null!;
@@ -29,51 +30,32 @@ public class MainForm : Form
     {
         InitializeComponent();
         LoadConfig();
-        LoadKeyboards();
 
-        bool isInteractive = Environment.GetCommandLineArgs().Length == 1;
+        // Check if started from Task Scheduler
+        bool isTaskScheduler = TaskSchedulerHelper.IsStartedFromTaskScheduler();
         bool isFirstRun = !File.Exists(ConfigManager.GetConfigPath());
 
-        bool showWindow = isFirstRun || isInteractive;
+        // Show window unless started from Task Scheduler
+        bool showWindow = !isTaskScheduler;
         _trayIcon = new TrayIcon(this, showWindow);
 
-        string? existingAutoStart = null;
-        try
-        {
-            using var key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(
-                @"Software\Microsoft\Windows\CurrentVersion\Run");
-            existingAutoStart = key.GetValue("MacKeysRemap") as string;
-            key.SetValue("MacKeysRemap", Application.ExecutablePath);
-        }
-        catch { }
+        // Ensure Task Scheduler task exists (replaces registry)
+        TaskSchedulerHelper.EnsureTaskExists();
 
-        Load += async (s, e) =>
+        // Load keyboards after window is shown
+        Load += (s, e) =>
         {
-            Log($"App started (interactive: {isInteractive}, firstRun: {isFirstRun}, showWindow: {showWindow})");
-            if (existingAutoStart != null && !string.Equals(existingAutoStart, Application.ExecutablePath, StringComparison.OrdinalIgnoreCase))
+            Log($"App started (taskScheduler: {isTaskScheduler}, firstRun: {isFirstRun})");
+            if (!isTaskScheduler)
             {
-                Log($"[Autostart] Registry path updated: '{existingAutoStart}' -> '{Application.ExecutablePath}' (was stale).");
+                LoadKeyboards();
             }
-            else
-            {
-                Log($"[Autostart] Registry path confirmed -> '{Application.ExecutablePath}'.");
-            }
-
-            try { await Task.Delay(300, CancellationToken.None); } catch { }
-            BeginInvoke(() =>
-            {
-                if (_startButton != null && !_startButton.IsDisposed && _startButton.Enabled)
-                {
-                    Log("[AutoStart] Launching remapping engine automatically (config has rules)...");
-                    _startButton.PerformClick();
-                }
-            });
         };
     }
 
     private void InitializeComponent()
     {
-        Text = "MacKeysRemap v1.0 - Per-Device Key Remapper";
+        Text = "MacKeysRemap v1.1 - Per-Device Key Remapper";
         Size = new Size(800, 650);
         StartPosition = FormStartPosition.CenterScreen;
 
@@ -235,11 +217,23 @@ public class MainForm : Form
         _exitButton.Click += ExitButton_Click;
         Controls.Add(_exitButton);
 
+        // Install driver button
+        _installDriverButton = new Button
+        {
+            Text = "Install Driver",
+            Location = new Point(10, 320),
+            Size = new Size(100, 25),
+            BackColor = Color.LightYellow,
+            Visible = false
+        };
+        _installDriverButton.Click += InstallDriverButton_Click;
+        Controls.Add(_installDriverButton);
+
         // Status label
         _statusLabel = new Label
         {
             Text = "Status: Stopped",
-            Location = new Point(10, 320),
+            Location = new Point(120, 325),
             AutoSize = true,
             Font = new Font(Font.FontFamily, 9, FontStyle.Bold)
         };
@@ -379,16 +373,8 @@ public class MainForm : Form
         if (!_driverWarningShown)
         {
             _driverWarningShown = true;
-            var result = MessageBox.Show(
-                "Interception driver not found or not loaded.\n\nWould you like to download and install it now? (Requires administrator privileges and reboot)",
-                "Driver Missing",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question);
-
-            if (result == DialogResult.Yes)
-            {
-                InstallDriver();
-            }
+            _installDriverButton.Visible = true;
+            Log("Interception driver not found. Click 'Install Driver' to download and install.");
         }
         _keyboardSelector.Items.Add(new KeyboardItem { DeviceId = 0, DisplayName = "Interception driver not installed" });
         _keyboardSelector.Enabled = false;
@@ -542,6 +528,11 @@ public class MainForm : Form
         Application.Exit();
     }
 
+    private void InstallDriverButton_Click(object? sender, EventArgs e)
+    {
+        InstallDriver();
+    }
+
     private async void InstallDriver()
     {
         try
@@ -550,7 +541,6 @@ public class MainForm : Form
             string baseDir = AppDomain.CurrentDomain.BaseDirectory;
             string zipPath = Path.Combine(baseDir, "Interception.zip");
 
-            // Interception zip already contains Interception folder — extract directly to baseDir
             Log("Downloading Interception driver package...");
             using (var client = new System.Net.Http.HttpClient())
             {
@@ -778,7 +768,6 @@ public class KeyCaptureDialog : Form
                     bool isKeyUp = (stroke.State & InterceptionNative.INTERCEPTION_KEY_UP) != 0;
                     bool isE0 = (stroke.State & InterceptionNative.INTERCEPTION_KEY_E0) != 0;
 
-                    // Pass stroke through so keys do not get stuck
                     InterceptionNative.interception_send(_context, device, ref stroke, 1);
 
                     if (!isKeyUp)
