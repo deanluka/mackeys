@@ -375,9 +375,13 @@ public class MainForm : Form
             }
         }
 
+        // Add custom string match option
+        _keyboardSelector.Items.Add(new KeyboardItem { DeviceId = -1, DisplayName = "Match custom string" });
+
         if (_keyboardSelector.Items.Count > 0)
         {
             _keyboardSelector.Enabled = true;
+            _keyboardSelector.DropDownStyle = ComboBoxStyle.DropDown;
             _keyboardSelector.SelectedIndex = _keyboardSelector.Items.Count > 1 ? 1 : 0;
         }
     }

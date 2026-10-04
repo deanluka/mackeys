@@ -11,9 +11,7 @@ public static class TaskSchedulerHelper
     {
         try
         {
-            using var process = Process.GetCurrentProcess();
-            var parent = process.Parent();
-            return parent?.ProcessName?.Equals("taskeng", StringComparison.OrdinalIgnoreCase) == true;
+            return Environment.GetCommandLineArgs().Contains("/tray");
         }
         catch
         {
@@ -21,10 +19,12 @@ public static class TaskSchedulerHelper
         }
     }
 
-    // Note: Parent() extension requires System.Management package
-
     public static void EnsureTaskExists()
     {
+        // If started from task scheduler, don't create/update task
+        if (IsStartedFromTaskScheduler())
+            return;
+
         try
         {
             string exePath = System.Windows.Forms.Application.ExecutablePath;
@@ -46,79 +46,25 @@ public static class TaskSchedulerHelper
 
             if (check.ExitCode == 0)
             {
-                // Task exists — update path if needed
-                var update = new Process
-                {
-                    StartInfo = new ProcessStartInfo
-                    {
-                        FileName = "schtasks",
-                        Arguments = $"/Change /TN \"{TaskName}\" /TR \"\\\"{exePath}\\\"\"",
-                        UseShellExecute = true,
-                        Verb = "runas",
-                        CreateNoWindow = true
-                    }
-                };
-                update.Start();
-                update.WaitForExit();
+                // Task exists — no need to update
+                return;
             }
-            else
-            {
-                // Create task
-                var create = new Process
-                {
-                    StartInfo = new ProcessStartInfo
-                    {
-                        FileName = "schtasks",
-                        Arguments = $"/Create /TN \"{TaskName}\" /TR \"\\\"{exePath}\\\"\" /SC ONLOGON /RL HIGHEST /F",
-                        UseShellExecute = true,
-                        Verb = "runas",
-                        CreateNoWindow = true
-                    }
-                };
-                create.Start();
-                create.WaitForExit();
-            }
-        }
-        catch { }
-    }
 
-    public static void RemoveTask()
-    {
-        try
-        {
-            var remove = new Process
+            // Create task
+            var create = new Process
             {
                 StartInfo = new ProcessStartInfo
                 {
                     FileName = "schtasks",
-                    Arguments = $"/Delete /TN \"{TaskName}\" /F",
+                    Arguments = $"/Create /TN \"{TaskName}\" /TR \"\\\"{exePath}\\\" /tray\" /SC ONLOGON /RL HIGHEST /F",
                     UseShellExecute = true,
                     Verb = "runas",
                     CreateNoWindow = true
                 }
             };
-            remove.Start();
-            remove.WaitForExit();
+            create.Start();
+            create.WaitForExit();
         }
         catch { }
-    }
-}
-
-public static class ProcessExtensions
-{
-    public static Process? Parent(this Process process)
-    {
-        try
-        {
-            using var searcher = new System.Management.ManagementObjectSearcher(
-                $"SELECT ParentProcessId FROM Win32_Process WHERE ProcessId = {process.Id}");
-            foreach (var obj in searcher.Get())
-            {
-                var parentId = Convert.ToInt32(obj["ParentProcessId"]);
-                return Process.GetProcessById(parentId);
-            }
-        }
-        catch { }
-        return null;
     }
 }
