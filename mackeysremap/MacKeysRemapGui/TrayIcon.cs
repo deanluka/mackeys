@@ -7,12 +7,14 @@ public class TrayIcon : IDisposable
     private Form _form;
     private bool _disposed = false;
     private bool _isFirstRun;
+    private bool _isTaskScheduler;
     private ToolStripButton _autoStartItem = null!;
 
-    public TrayIcon(Form form, bool isFirstRun)
+    public TrayIcon(Form form, bool isFirstRun, bool isTaskScheduler = false)
     {
         _form = form;
         _isFirstRun = isFirstRun;
+        _isTaskScheduler = isTaskScheduler;
         Initialize();
     }
 
@@ -56,8 +58,17 @@ public class TrayIcon : IDisposable
             }
         };
 
-        // First run: show window; otherwise: go straight to tray
-        if (_isFirstRun)
+        // Task Scheduler: go straight to tray; First run: show window; otherwise: go to tray
+        if (_isTaskScheduler)
+        {
+            _form.Shown += (s, e) =>
+            {
+                _form.WindowState = FormWindowState.Minimized;
+                _form.ShowInTaskbar = false;
+                _form.Hide();
+            };
+        }
+        else if (_isFirstRun)
         {
             _form.Shown += (s, e) =>
             {

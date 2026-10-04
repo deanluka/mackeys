@@ -37,7 +37,7 @@ public class MainForm : Form
 
         // Show window unless started from Task Scheduler
         bool showWindow = !isTaskScheduler;
-        _trayIcon = new TrayIcon(this, showWindow);
+        _trayIcon = new TrayIcon(this, showWindow, isTaskScheduler);
 
         // Ensure Task Scheduler task exists (replaces registry)
         TaskSchedulerHelper.EnsureTaskExists();
