@@ -165,6 +165,7 @@ public class MainForm : Form
         {
             Location = new Point(10, 75),
             Size = new Size(765, 200),
+            Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right,
             AllowUserToAddRows = false,
             AllowUserToDeleteRows = false,
             ReadOnly = true,
@@ -257,6 +258,7 @@ public class MainForm : Form
         {
             Location = new Point(10, 350),
             Size = new Size(765, 250),
+            Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right,
             Multiline = true,
             ScrollBars = ScrollBars.Vertical,
             ReadOnly = true,
