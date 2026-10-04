@@ -46,10 +46,9 @@ public class MainForm : Form
         Load += async (s, e) =>
         {
             Log($"App started (taskScheduler: {isTaskScheduler}, firstRun: {isFirstRun})");
-            if (!isTaskScheduler)
-            {
-                LoadKeyboards();
-            }
+
+            // Always load keyboards, even when started from task scheduler
+            LoadKeyboards();
 
             // Auto-start mapping if config has rules
             if (_config.Count > 0)
@@ -257,13 +256,13 @@ public class MainForm : Form
         _logTextBox = new TextBox
         {
             Location = new Point(10, 350),
-            Size = new Size(765, 200),
+            Size = new Size(765, 250),
             Multiline = true,
             ScrollBars = ScrollBars.Vertical,
             ReadOnly = true,
             BackColor = Color.Black,
             ForeColor = Color.LightGreen,
-            Font = new Font("Consolas", 8)
+            Font = new Font("Consolas", 10)
         };
         Controls.Add(_logTextBox);
 
