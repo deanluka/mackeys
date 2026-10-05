@@ -6,9 +6,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
-    <AssemblyName>MacKeysRemapGui</AssemblyName>
+    <AssemblyName>MacKeysRemap</AssemblyName>
     <RootNamespace>MacKeysRemapGui</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>icon.ico</ApplicationIcon>
     <DebugType>None</DebugType>
     <DebugSymbols>false</DebugSymbols>
     <PublishReadyToRun>true</PublishReadyToRun>
