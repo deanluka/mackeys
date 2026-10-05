@@ -71,6 +71,7 @@ public class MainForm : Form
         Text = "MacKeysRemap v1.1 - Per-Device Key Remapper";
         Size = new Size(800, 650);
         StartPosition = FormStartPosition.CenterScreen;
+        Icon = System.Drawing.SystemIcons.Application;
 
         // Keyboard selector
         var keyboardLabel = new Label
@@ -165,7 +166,7 @@ public class MainForm : Form
         {
             Location = new Point(10, 75),
             Size = new Size(765, 200),
-            Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right,
+            Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
             AllowUserToAddRows = false,
             AllowUserToDeleteRows = false,
             ReadOnly = true,
@@ -196,6 +197,16 @@ public class MainForm : Form
         };
         _saveButton.Click += SaveButton_Click;
         Controls.Add(_saveButton);
+
+        // Status label
+        _statusLabel = new Label
+        {
+            Text = "Status: Stopped",
+            Location = new Point(170, 290),
+            AutoSize = true,
+            Font = new Font(Font.FontFamily, 9, FontStyle.Bold)
+        };
+        Controls.Add(_statusLabel);
 
         // Start button
         _startButton = new Button
@@ -242,16 +253,6 @@ public class MainForm : Form
         };
         _installDriverButton.Click += InstallDriverButton_Click;
         Controls.Add(_installDriverButton);
-
-        // Status label
-        _statusLabel = new Label
-        {
-            Text = "Status: Stopped",
-            Location = new Point(120, 325),
-            AutoSize = true,
-            Font = new Font(Font.FontFamily, 9, FontStyle.Bold)
-        };
-        Controls.Add(_statusLabel);
 
         // Log textbox
         _logTextBox = new TextBox
