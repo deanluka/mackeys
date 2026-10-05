@@ -43,7 +43,7 @@ public class TrayIcon : IDisposable
 
         _notifyIcon = new NotifyIcon
         {
-            Icon = System.Drawing.SystemIcons.Application,
+            Icon = new System.Drawing.Icon("icon.ico"),
             Text = "MacKeysRemap - Per-Device Key Remapper",
             ContextMenuStrip = _contextMenu,
             Visible = true

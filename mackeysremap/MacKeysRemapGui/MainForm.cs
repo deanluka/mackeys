@@ -71,7 +71,7 @@ public class MainForm : Form
         Text = "MacKeysRemap v1.1 - Per-Device Key Remapper";
         Size = new Size(800, 650);
         StartPosition = FormStartPosition.CenterScreen;
-        Icon = System.Drawing.SystemIcons.Application;
+        Icon = new System.Drawing.Icon("icon.ico");
 
         // Keyboard selector
         var keyboardLabel = new Label
@@ -257,8 +257,8 @@ public class MainForm : Form
         // Log textbox
         _logTextBox = new TextBox
         {
-            Location = new Point(10, 350),
-            Size = new Size(765, 250),
+            Location = new Point(10, 320),
+            Size = new Size(765, 280),
             Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right,
             Multiline = true,
             ScrollBars = ScrollBars.Vertical,
