@@ -34,6 +34,14 @@ public class TrayIcon : IDisposable
         };
         _autoStartItem.Click += (s, e) =>
         {
+            if (_autoStartItem.Checked)
+            {
+                TaskSchedulerHelper.EnsureTaskExists();
+            }
+            else
+            {
+                TaskSchedulerHelper.RemoveTask();
+            }
             SetAutoStart(_autoStartItem.Checked);
         };
         _contextMenu.Items.Add(_autoStartItem);

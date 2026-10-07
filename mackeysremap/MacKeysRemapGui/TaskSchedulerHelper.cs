@@ -50,7 +50,7 @@ public static class TaskSchedulerHelper
                 return;
             }
 
-            // Create task
+            // Create task (no power condition)
             var create = new Process
             {
                 StartInfo = new ProcessStartInfo
@@ -64,6 +64,27 @@ public static class TaskSchedulerHelper
             };
             create.Start();
             create.WaitForExit();
+        }
+        catch { }
+    }
+
+    public static void RemoveTask()
+    {
+        try
+        {
+            var remove = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "schtasks",
+                    Arguments = $"/Delete /TN \"{TaskName}\" /F",
+                    UseShellExecute = true,
+                    Verb = "runas",
+                    CreateNoWindow = true
+                }
+            };
+            remove.Start();
+            remove.WaitForExit();
         }
         catch { }
     }
