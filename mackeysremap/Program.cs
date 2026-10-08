@@ -35,8 +35,8 @@ class Program
     [DllImport(InterceptionDll, CallingConvention = CallingConvention.Cdecl)]
     private static extern int interception_is_keyboard(int device);
 
-    [DllImport(InterceptionDll, CallingConvention = CallingConvention.Cdecl)]
-    private static extern int interception_get_hardware_id(int device, IntPtr buffer, int size);
+    [DllImport(InterceptionDll, EntryPoint = "interception_get_hardware_id", CallingConvention = CallingConvention.Cdecl)]
+    private static extern uint interception_get_hardware_id(IntPtr context, int device, IntPtr hardwareIdBuffer, uint bufferSize);
 
     [DllImport(InterceptionDll, CallingConvention = CallingConvention.Cdecl)]
     private static extern IntPtr interception_wait_with_timeout(IntPtr context, int milliseconds);
@@ -250,8 +250,7 @@ class Program
         var buffer = Marshal.AllocHGlobal(4096);
         try
         {
-            int size = 4096;
-            int result = interception_get_hardware_id(deviceId, buffer, size);
+            uint result = interception_get_hardware_id(_context, deviceId, buffer, 4096);
             if (result > 0)
             {
                 return Marshal.PtrToStringUni(buffer) ?? "";
