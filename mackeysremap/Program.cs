@@ -28,7 +28,9 @@ class Program
     private static extern int interception_receive(IntPtr context, int device, ref KeyStroke stroke, int n);
 
     [DllImport(InterceptionDll, CallingConvention = CallingConvention.Cdecl)]
-    private static extern void interception_set_filter(IntPtr context, int predicate, ushort filter);
+    private static extern void interception_set_filter(IntPtr context, Predicate predicate, ushort filter);
+
+    private delegate int Predicate(int device);
 
     [DllImport(InterceptionDll, CallingConvention = CallingConvention.Cdecl)]
     private static extern int interception_is_keyboard(int device);
@@ -150,13 +152,8 @@ class Program
         }
 
         // Set filter for all keyboards
-        for (int i = 1; i <= INTERCEPTION_MAX_KEYBOARD; i++)
-        {
-            if (interception_is_keyboard(i) == 1)
-            {
-                interception_set_filter(_context, i, INTERCEPTION_FILTER_KEYBOARD_ALL);
-            }
-        }
+        Predicate isKeyboard = (device) => interception_is_keyboard(device);
+        interception_set_filter(_context, isKeyboard, INTERCEPTION_FILTER_KEYBOARD_ALL);
 
         // Enumerate keyboards
         int detectedCount = 0;
