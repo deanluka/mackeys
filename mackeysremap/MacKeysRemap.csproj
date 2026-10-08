@@ -5,12 +5,16 @@
     <TargetFramework>net8.0-windows</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <AssemblyName>MacKeysRemap</AssemblyName>
+    <AssemblyName>mackeysremap</AssemblyName>
     <RootNamespace>MacKeysRemap</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <SelfContained>true</SelfContained>
     <PublishSingleFile>true</PublishSingleFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="MacKeysRemapGui\**" />
+  </ItemGroup>
 
 </Project>
