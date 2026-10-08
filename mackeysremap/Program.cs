@@ -311,7 +311,7 @@ class Program
             bool isKeyUp = (stroke.State & 0x01) != 0;
             bool isE0 = (stroke.State & 0x02) != 0;
             bool isE1 = (stroke.State & 0x04) != 0;
-            string keyName = GetKeyName(stroke.Code, isE0);
+            string keyName = KeyNames.GetKeyName(stroke.Code, isE0);
             string hwId = GetHardwareId(device);
 
             if (!isKeyUp)
@@ -325,17 +325,20 @@ class Program
             {
                 if (!MatchesKeyboard(remap.Keyboard, device, hwId, keyboardName)) continue;
 
-                ushort fromCode = GetScanCode(remap.From);
-                bool fromE0 = remap.From.StartsWith("E0");
+                var fromKey = KeyNames.FindKey(remap.From);
+                if (fromKey == null) continue;
+                ushort fromCode = fromKey.Code;
+                bool fromE0 = fromKey.IsE0;
 
                 if (fromCode == stroke.Code)
                 {
-                    ushort toCode = GetScanCode(remap.To);
-                    stroke.Code = toCode;
+                    var toKey = KeyNames.FindKey(remap.To);
+                    if (toKey == null) continue;
+                    stroke.Code = toKey.Code;
 
                     if (!isKeyUp)
                     {
-                        Log($"[INT][Dev {device}][MATCH] Device='{keyboardName}' | ConfigKeyboard='{remap.Keyboard}' | {remap.From} (0x{fromCode:X2},E0={fromE0}) -> {remap.To} (0x{toCode:X2}) | RawState=0x{stroke.State:X4}");
+                        Log($"[INT][Dev {device}][MATCH] Device='{keyboardName}' | ConfigKeyboard='{remap.Keyboard}' | {remap.From} (0x{fromCode:X2},E0={fromE0}) -> {remap.To} (0x{toKey.Code:X2}) | RawState=0x{stroke.State:X4}");
                     }
                     matched = true;
                     break;
@@ -357,180 +360,6 @@ class Program
         return false;
     }
 
-    private static string GetKeyName(ushort code, bool isE0)
-    {
-        if (isE0)
-        {
-            return code switch
-            {
-                0x1C => "Enter",
-                0x1D => "RCtrl",
-                0x35 => "Numpad /",
-                0x37 => "PrintScreen",
-                0x38 => "RAlt",
-                0x45 => "NumLock",
-                0x46 => "Pause",
-                0x47 => "Home",
-                0x48 => "Up",
-                0x49 => "PageUp",
-                0x4B => "Left",
-                0x4D => "Right",
-                0x4F => "End",
-                0x50 => "Down",
-                0x51 => "PageDown",
-                0x52 => "Insert",
-                0x53 => "Delete",
-                0x5B => "LWin",
-                0x5C => "RWin",
-                _ => $"E0_0x{code:X2}"
-            };
-        }
-
-        return code switch
-        {
-            0x01 => "Escape",
-            0x02 => "1",
-            0x03 => "2",
-            0x04 => "3",
-            0x05 => "4",
-            0x06 => "5",
-            0x07 => "6",
-            0x08 => "7",
-            0x09 => "8",
-            0x0A => "9",
-            0x0B => "0",
-            0x0C => "-",
-            0x0D => "Enter",
-            0x0E => "Backspace",
-            0x0F => "Tab",
-            0x10 => "Q",
-            0x11 => "W",
-            0x12 => "E",
-            0x13 => "R",
-            0x14 => "CapsLock",
-            0x15 => "T",
-            0x16 => "Y",
-            0x17 => "U",
-            0x18 => "I",
-            0x19 => "O",
-            0x1A => "P",
-            0x1B => "[",
-            0x1C => "]",
-            0x1D => "Enter",
-            0x1E => "A",
-            0x1F => "S",
-            0x20 => "Space",
-            0x21 => "PageUp",
-            0x22 => "PageDown",
-            0x23 => "End",
-            0x24 => "Home",
-            0x25 => "Left",
-            0x26 => "Up",
-            0x27 => "Right",
-            0x28 => "Down",
-            0x29 => "D",
-            0x2A => "F",
-            0x2B => "G",
-            0x2C => "PrintScreen",
-            0x2D => "Insert",
-            0x2E => "Delete",
-            0x2F => "H",
-            0x30 => "J",
-            0x31 => "K",
-            0x32 => "L",
-            0x33 => ";",
-            0x34 => "'",
-            0x35 => "Numpad /",
-            0x36 => "RShift",
-            0x37 => "PrintScreen",
-            0x38 => "RAlt",
-            0x39 => "Space",
-            0x3A => "CapsLock",
-            0x3B => "F1",
-            0x3C => "F2",
-            0x3D => "F3",
-            0x3E => "F4",
-            0x3F => "F5",
-            0x40 => "F6",
-            0x41 => "F7",
-            0x42 => "F8",
-            0x43 => "F9",
-            0x44 => "F10",
-            0x45 => "NumLock",
-            0x46 => "Pause",
-            0x47 => "Home",
-            0x48 => "Up",
-            0x49 => "PageUp",
-            0x4A => "Numpad -",
-            0x4B => "Left",
-            0x4C => "Numpad 5",
-            0x4D => "Right",
-            0x4E => "Numpad +",
-            0x4F => "End",
-            0x50 => "Down",
-            0x51 => "PageDown",
-            0x52 => "Insert",
-            0x53 => "Delete",
-            0x57 => "F11",
-            0x58 => "F12",
-            0x90 => "NumLock",
-            0x91 => "ScrollLock",
-            0xA0 => "LShift",
-            0xA1 => "RShift",
-            0xA2 => "LCtrl",
-            0xA3 => "RCtrl",
-            0xA4 => "LAlt",
-            0xA5 => "RAlt",
-            0x5B => "LWin",
-            0x5C => "RWin",
-            _ => $"0x{code:X2}"
-        };
-    }
-
-    private static ushort GetScanCode(string keyName)
-    {
-        return keyName.ToUpper() switch
-        {
-            "LALT" => 0x38,
-            "RALT" => 0xE038,
-            "LWIN" => 0x5B,
-            "RWIN" => 0xE05C,
-            "LCTRL" => 0x1D,
-            "RCTRL" => 0xE01D,
-            "LSHIFT" => 0x2A,
-            "RSHIFT" => 0x36,
-            "F1" => 0x3B,
-            "F2" => 0x3C,
-            "F3" => 0x3D,
-            "F4" => 0x3E,
-            "F5" => 0x3F,
-            "F6" => 0x40,
-            "F7" => 0x41,
-            "F8" => 0x42,
-            "F9" => 0x43,
-            "F10" => 0x44,
-            "F11" => 0x57,
-            "F12" => 0x58,
-            "INSERT" => 0xE052,
-            "DELETE" => 0xE053,
-            "HOME" => 0xE047,
-            "END" => 0xE04F,
-            "PAGEUP" => 0xE049,
-            "PAGEDOWN" => 0xE051,
-            "PRINTSCREEN" => 0xE037,
-            "SCROLLLOCK" => 0x46,
-            "PAUSE" => 0xE045,
-            "CAPSLOCK" => 0x3A,
-            "NUMLOCK" => 0x45,
-            "ESCAPE" => 0x01,
-            "SPACE" => 0x39,
-            "TAB" => 0x0F,
-            "ENTER" => 0x1C,
-            "BACKSPACE" => 0x0E,
-            _ => 0x00
-        };
-    }
-
     private static IntPtr HookCallback(int nCode, IntPtr wParam, IntPtr lParam)
     {
         if (nCode >= 0)
@@ -549,20 +378,21 @@ class Program
             // Skip injected keys
             if (kbData.dwExtraInfo == (UIntPtr)INJECTED_EXTRA_INFO) return CallNextHookEx(_hookId, nCode, wParam, lParam);
 
-            string keyName = GetKeyNameFromVK((byte)kbData.vkCode);
+            string keyName = KeyNames.GetKeyNameFromVK((byte)kbData.vkCode);
 
             foreach (var remap in _config)
             {
                 if (!remap.From.Equals(keyName, StringComparison.OrdinalIgnoreCase)) continue;
 
-                ushort toCode = GetScanCode(remap.To);
-                if (toCode == 0) continue;
+                var toKey = KeyNames.FindKey(remap.To);
+                if (toKey == null) continue;
+                ushort toCode = toKey.Code;
 
                 uint flags = 0;
                 if (isUp) flags |= KEYEVENTF_KEYUP;
-                if (toCode > 0xFF) flags |= KEYEVENTF_EXTENDEDKEY;
+                if (toKey.IsE0) flags |= KEYEVENTF_EXTENDEDKEY;
 
-                byte vk = GetVKFromScanCode(toCode);
+                byte vk = toKey.VirtualKey;
                 keybd_event(vk, (byte)toCode, flags, (UIntPtr)INJECTED_EXTRA_INFO);
 
                 if (isDown) Log($"[MEDIA] {keyName} -> {remap.To}");
@@ -572,65 +402,6 @@ class Program
             return CallNextHookEx(_hookId, nCode, wParam, lParam);
         }
         return CallNextHookEx(_hookId, nCode, wParam, lParam);
-    }
-
-    private static string GetKeyNameFromVK(byte vk)
-    {
-        return vk switch
-        {
-            0xAD => "VolumeMute",
-            0xAE => "VolumeDown",
-            0xAF => "VolumeUp",
-            0xB0 => "NextTrack",
-            0xB1 => "PrevTrack",
-            0xB2 => "Stop",
-            0xB3 => "PlayPause",
-            _ => $"VK_0x{vk:X2}"
-        };
-    }
-
-    private static byte GetVKFromScanCode(ushort scanCode)
-    {
-        return scanCode switch
-        {
-            0x38 => 0xA4, // LAlt -> LWin (VK_MENU)
-            0xE038 => 0xA5, // RAlt -> RWin
-            0x5B => 0xA4, // LWin -> LAlt (VK_LWIN -> VK_MENU)
-            0xE05C => 0xA5, // RWin -> RAlt
-            0x1D => 0xA2, // LCtrl
-            0xE01D => 0xA3, // RCtrl
-            0x2A => 0xA0, // LShift
-            0x36 => 0xA1, // RShift
-            0x3B => 0x70, // F1
-            0x3C => 0x71, // F2
-            0x3D => 0x72, // F3
-            0x3E => 0x73, // F4
-            0x3F => 0x74, // F5
-            0x40 => 0x75, // F6
-            0x41 => 0x76, // F7
-            0x42 => 0x77, // F8
-            0x43 => 0x78, // F9
-            0x44 => 0x79, // F10
-            0x57 => 0x7A, // F11
-            0x58 => 0x7B, // F12
-            0xE052 => 0x2D, // Insert
-            0xE053 => 0x2E, // Delete
-            0xE047 => 0x24, // Home
-            0xE04F => 0x23, // End
-            0xE049 => 0x21, // PageUp
-            0xE051 => 0x22, // PageDown
-            0xE037 => 0x2C, // PrintScreen
-            0x46 => 0x91, // ScrollLock
-            0xE045 => 0x13, // Pause
-            0x3A => 0x14, // CapsLock
-            0x45 => 0x90, // NumLock
-            0x01 => 0x1B, // Escape
-            0x39 => 0x20, // Space
-            0x0F => 0x09, // Tab
-            0x1C => 0x0D, // Enter
-            0x0E => 0x08, // Backspace
-            _ => 0
-        };
     }
 
     private static void Log(string message)
