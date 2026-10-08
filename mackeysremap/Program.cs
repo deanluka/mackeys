@@ -109,7 +109,7 @@ class Program
         _logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "MacKeysRemap.log");
 
         Log("========================================");
-        Log("  MacKeysRemap - Per-Device Key Remapper");
+        Log("  MacKeysRemap Console - Per-Device Key Remapper");
         Log("========================================");
         Log("");
 
@@ -138,6 +138,16 @@ class Program
         }
         Log("");
 
+        // Check for interception.dll
+        if (!File.Exists("interception.dll"))
+        {
+            Log("ERROR: interception.dll not found in application directory.");
+            Log("Please make sure interception.dll is in the same folder as mackeysremap.exe");
+            if (_consoleMode) Console.ReadKey();
+            return;
+        }
+        Log("interception.dll found.");
+
         // Create Interception context
         _context = interception_create_context();
         if (_context == IntPtr.Zero)
@@ -150,6 +160,7 @@ class Program
             if (_consoleMode) Console.ReadKey();
             return;
         }
+        Log("Interception driver found and loaded.");
 
         // Set filter for all keyboards
         Predicate isKeyboard = (device) => interception_is_keyboard(device);
@@ -263,10 +274,20 @@ class Program
 
     private static string GetFriendlyName(string hwId, int deviceId)
     {
-        if (hwId.Contains("VID_"))
+        if (string.IsNullOrEmpty(hwId)) return $"Keyboard {deviceId}";
+
+        // Extract friendly name from hardware ID
+        // ACPI\VEN_LEN&DEV_0071 -> "Internal / PS2 Keyboard"
+        // HID\VID_046D&PID_C534 -> "Logitech Keyboard"
+        if (hwId.StartsWith("ACPI\\"))
         {
-            var parts = hwId.Split('&');
-            if (parts.Length > 0) return parts[0];
+            if (hwId.Contains("VEN_LEN")) return "Internal / PS2 Keyboard";
+            return "ACPI Keyboard";
+        }
+        if (hwId.StartsWith("HID\\"))
+        {
+            if (hwId.Contains("VID_")) return "USB/HID Keyboard";
+            return "HID Keyboard";
         }
         return hwId;
     }
@@ -368,12 +389,36 @@ class Program
         return code switch
         {
             0x01 => "Escape",
-            0x09 => "Tab",
+            0x02 => "1",
+            0x03 => "2",
+            0x04 => "3",
+            0x05 => "4",
+            0x06 => "5",
+            0x07 => "6",
+            0x08 => "7",
+            0x09 => "8",
+            0x0A => "9",
+            0x0B => "0",
+            0x0C => "-",
             0x0D => "Enter",
             0x0E => "Backspace",
             0x0F => "Tab",
+            0x10 => "Q",
+            0x11 => "W",
+            0x12 => "E",
+            0x13 => "R",
             0x14 => "CapsLock",
-            0x1C => "Enter",
+            0x15 => "T",
+            0x16 => "Y",
+            0x17 => "U",
+            0x18 => "I",
+            0x19 => "O",
+            0x1A => "P",
+            0x1B => "[",
+            0x1C => "]",
+            0x1D => "Enter",
+            0x1E => "A",
+            0x1F => "S",
             0x20 => "Space",
             0x21 => "PageUp",
             0x22 => "PageDown",
@@ -383,10 +428,51 @@ class Program
             0x26 => "Up",
             0x27 => "Right",
             0x28 => "Down",
+            0x29 => "D",
+            0x2A => "F",
+            0x2B => "G",
             0x2C => "PrintScreen",
             0x2D => "Insert",
             0x2E => "Delete",
+            0x2F => "H",
+            0x30 => "J",
+            0x31 => "K",
+            0x32 => "L",
+            0x33 => ";",
+            0x34 => "'",
+            0x35 => "Numpad /",
+            0x36 => "RShift",
+            0x37 => "PrintScreen",
+            0x38 => "RAlt",
             0x39 => "Space",
+            0x3A => "CapsLock",
+            0x3B => "F1",
+            0x3C => "F2",
+            0x3D => "F3",
+            0x3E => "F4",
+            0x3F => "F5",
+            0x40 => "F6",
+            0x41 => "F7",
+            0x42 => "F8",
+            0x43 => "F9",
+            0x44 => "F10",
+            0x45 => "NumLock",
+            0x46 => "Pause",
+            0x47 => "Home",
+            0x48 => "Up",
+            0x49 => "PageUp",
+            0x4A => "Numpad -",
+            0x4B => "Left",
+            0x4C => "Numpad 5",
+            0x4D => "Right",
+            0x4E => "Numpad +",
+            0x4F => "End",
+            0x50 => "Down",
+            0x51 => "PageDown",
+            0x52 => "Insert",
+            0x53 => "Delete",
+            0x57 => "F11",
+            0x58 => "F12",
             0x90 => "NumLock",
             0x91 => "ScrollLock",
             0xA0 => "LShift",

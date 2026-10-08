@@ -68,7 +68,7 @@ public class MainForm : Form
 
     private void InitializeComponent()
     {
-        Text = "MacKeysRemap v1.1 - Per-Device Key Remapper";
+        Text = "MacKeysRemap GUI v1.1 - Per-Device Key Remapper";
         Size = new Size(800, 650);
         StartPosition = FormStartPosition.CenterScreen;
         Icon = new System.Drawing.Icon("icon.ico");
