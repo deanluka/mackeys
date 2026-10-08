@@ -286,19 +286,23 @@ class Program
             string keyboardName = GetFriendlyName(GetHardwareId(device), device);
             _lastActiveDevice = keyboardName;
 
-            // Log every key press
+            // Log every key press with full info (same as GUI)
             bool isKeyUp = (stroke.State & 0x01) != 0;
             bool isE0 = (stroke.State & 0x02) != 0;
+            bool isE1 = (stroke.State & 0x04) != 0;
             string keyName = GetKeyName(stroke.Code, isE0);
+            string hwId = GetHardwareId(device);
+
             if (!isKeyUp)
             {
-                Log($"[KEY] [{keyboardName}] {keyName} (Code=0x{stroke.Code:X2}, E0={isE0})");
+                Log($"[INT][Dev {device}][NO-MATCH] Device='{keyboardName}' (HWID='{hwId}') | Key='{keyName}' | Code=0x{stroke.Code:X2} | State=0x{stroke.State:X4} (UP={isKeyUp}, E0={isE0}, E1={isE1}) | Info=0x{stroke.Information:X8}");
             }
 
-            // Check remapping rules
+            // Check remapping rules - match by substring
+            bool matched = false;
             foreach (var remap in _config)
             {
-                if (!MatchesKeyboard(remap.Keyboard, device, GetHardwareId(device), keyboardName)) continue;
+                if (!MatchesKeyboard(remap.Keyboard, device, hwId, keyboardName)) continue;
 
                 ushort fromCode = GetScanCode(remap.From);
                 bool fromE0 = remap.From.StartsWith("E0");
@@ -310,8 +314,9 @@ class Program
 
                     if (!isKeyUp)
                     {
-                        Log($"[MATCH] [{keyboardName}] {remap.From} -> {remap.To}");
+                        Log($"[INT][Dev {device}][MATCH] Device='{keyboardName}' | ConfigKeyboard='{remap.Keyboard}' | {remap.From} (0x{fromCode:X2},E0={fromE0}) -> {remap.To} (0x{toCode:X2}) | RawState=0x{stroke.State:X4}");
                     }
+                    matched = true;
                     break;
                 }
             }
