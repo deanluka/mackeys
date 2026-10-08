@@ -155,16 +155,19 @@ class Program
         Predicate isKeyboard = (device) => interception_is_keyboard(device);
         interception_set_filter(_context, isKeyboard, INTERCEPTION_FILTER_KEYBOARD_ALL);
 
-        // Enumerate keyboards
+        // Enumerate keyboards - only show real keyboards with hardware IDs
         int detectedCount = 0;
         for (int i = 1; i <= INTERCEPTION_MAX_KEYBOARD; i++)
         {
             if (interception_is_keyboard(i) == 1)
             {
                 string hwId = GetHardwareId(i);
-                string name = string.IsNullOrEmpty(hwId) ? $"Keyboard {i}" : GetFriendlyName(hwId, i);
-                Log($"Found keyboard {i}: {name} ({hwId})");
-                detectedCount++;
+                if (!string.IsNullOrEmpty(hwId))
+                {
+                    string name = GetFriendlyName(hwId, i);
+                    Log($"Found keyboard {i}: {name} ({hwId})");
+                    detectedCount++;
+                }
             }
         }
 
@@ -244,11 +247,16 @@ class Program
 
     private static string GetHardwareId(int deviceId)
     {
-        var buffer = Marshal.AllocHGlobal(1024);
+        var buffer = Marshal.AllocHGlobal(4096);
         try
         {
-            int len = interception_get_hardware_id(deviceId, buffer, 1024);
-            return len > 0 ? Marshal.PtrToStringUni(buffer) ?? "" : "";
+            int size = 4096;
+            int result = interception_get_hardware_id(deviceId, buffer, size);
+            if (result > 0)
+            {
+                return Marshal.PtrToStringUni(buffer) ?? "";
+            }
+            return "";
         }
         catch { return ""; }
         finally { Marshal.FreeHGlobal(buffer); }
@@ -279,6 +287,15 @@ class Program
             string keyboardName = GetFriendlyName(GetHardwareId(device), device);
             _lastActiveDevice = keyboardName;
 
+            // Log every key press
+            bool isKeyUp = (stroke.State & 0x01) != 0;
+            bool isE0 = (stroke.State & 0x02) != 0;
+            string keyName = GetKeyName(stroke.Code, isE0);
+            if (!isKeyUp)
+            {
+                Log($"[KEY] [{keyboardName}] {keyName} (Code=0x{stroke.Code:X2}, E0={isE0})");
+            }
+
             // Check remapping rules
             foreach (var remap in _config)
             {
@@ -292,7 +309,6 @@ class Program
                     ushort toCode = GetScanCode(remap.To);
                     stroke.Code = toCode;
 
-                    bool isKeyUp = (stroke.State & 0x01) != 0;
                     if (!isKeyUp)
                     {
                         Log($"[MATCH] [{keyboardName}] {remap.From} -> {remap.To}");
@@ -314,6 +330,71 @@ class Program
         if (!string.IsNullOrEmpty(hardwareId) && hardwareId.Contains(configKeyboard, StringComparison.OrdinalIgnoreCase)) return true;
         if (friendlyName.Contains(configKeyboard, StringComparison.OrdinalIgnoreCase)) return true;
         return false;
+    }
+
+    private static string GetKeyName(ushort code, bool isE0)
+    {
+        if (isE0)
+        {
+            return code switch
+            {
+                0x1C => "Enter",
+                0x1D => "RCtrl",
+                0x35 => "Numpad /",
+                0x37 => "PrintScreen",
+                0x38 => "RAlt",
+                0x45 => "NumLock",
+                0x46 => "Pause",
+                0x47 => "Home",
+                0x48 => "Up",
+                0x49 => "PageUp",
+                0x4B => "Left",
+                0x4D => "Right",
+                0x4F => "End",
+                0x50 => "Down",
+                0x51 => "PageDown",
+                0x52 => "Insert",
+                0x53 => "Delete",
+                0x5B => "LWin",
+                0x5C => "RWin",
+                _ => $"E0_0x{code:X2}"
+            };
+        }
+
+        return code switch
+        {
+            0x01 => "Escape",
+            0x09 => "Tab",
+            0x0D => "Enter",
+            0x0E => "Backspace",
+            0x0F => "Tab",
+            0x14 => "CapsLock",
+            0x1C => "Enter",
+            0x20 => "Space",
+            0x21 => "PageUp",
+            0x22 => "PageDown",
+            0x23 => "End",
+            0x24 => "Home",
+            0x25 => "Left",
+            0x26 => "Up",
+            0x27 => "Right",
+            0x28 => "Down",
+            0x2C => "PrintScreen",
+            0x2D => "Insert",
+            0x2E => "Delete",
+            0x39 => "Space",
+            0x90 => "NumLock",
+            0x91 => "ScrollLock",
+            0xA0 => "LShift",
+            0xA1 => "RShift",
+            0xA2 => "LCtrl",
+            0xA3 => "RCtrl",
+            0xA4 => "LAlt",
+            0xA5 => "RAlt",
+            0x5B => "LWin",
+            0x5C => "RWin",
+            _ => $"0x{code:X2}"
+        };
     }
 
     private static ushort GetScanCode(string keyName)
