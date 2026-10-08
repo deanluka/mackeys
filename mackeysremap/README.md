@@ -1,134 +1,159 @@
-# Mac Keys Remapper for Windows (Boot Camp)
+# MacKeysRemap
 
-Remaps internal Mac keyboard keys on Windows 10/11 running via Boot Camp:
-- **Option (Alt) → Win**
-- **Command (Win) → Alt**
+Per-device key remapper for Windows (Boot Camp). Remaps internal Mac keyboard without affecting external keyboards.
 
-**Does NOT affect external Windows keyboards** — they keep their normal layout.
+## Two Apps
+
+| App | Exe Name | Purpose |
+|-----|----------|---------|
+| **Non-GUI** | `mackeysremap.exe` | Lightweight console app — runs in background, logs to file |
+| **GUI** | `MacKeysRemap.exe` | Full GUI — tray icon, visual config, key capture |
 
 ## How It Works
 
-Uses the [Interception](https://github.com/oblitum/Interception) keyboard driver to intercept and remap keys at the driver level, per-device. This means:
+Uses the [Interception](https://github.com/oblitum/Interception) keyboard driver to intercept and remap keys at the driver level, per-device:
+
 - Only the internal Mac keyboard is remapped
 - External keyboards pass through unchanged
 - Works system-wide, in all applications
-- No reboot required after installation
+- Media keys (volume, mute, play/pause) via WH_KEYBOARD_LL hook
 
 ## Prerequisites
 
 1. **Windows 10/11** (Boot Camp)
 2. **Interception driver** installed
 
-## Installation
+### Install Interception Driver
 
-### Step 1: Install Interception Driver (Required)
-
-The Interception driver is a low-level keyboard/mouse driver that allows per-device key remapping.
-
-1. Download Interception from https://github.com/oblitum/Interception/releases
-2. Extract the archive
-3. Open **Command Prompt as Administrator**
-4. Run:
+1. Download from https://github.com/oblitum/Interception/releases
+2. Extract and open **Command Prompt as Administrator**
+3. Run:
    ```
    install-interception.exe /install
    ```
-5. **Reboot your computer**
+4. **Reboot your computer**
 
-> **Note:** The driver is safe and open-source. It has been used by many projects for years. You can uninstall it anytime with `install-interception.exe /uninstall` followed by a reboot.
+## Non-GUI App (mackeysremap.exe)
 
-### Step 2: Download and Run
-
-1. Download the latest release from the [Releases](https://github.com/deanluka/mackeys/releases) page
-2. Extract `MacKeysRemap.exe` to a folder of your choice
-3. **Right-click** `MacKeysRemap.exe` and select **"Run as administrator"**
-
-Or from Command Prompt (as Administrator):
-```bash
-MacKeysRemap.exe
-```
-
-## Usage
-
-### Default Usage
-
-The app automatically detects the internal Mac keyboard by looking for "Apple" in the device name:
+### Usage
 
 ```bash
-MacKeysRemap.exe
+# Run with logs on screen (console mode)
+mackeysremap.exe --console
+
+# Run with logs to file (MacKeysRemap.log in same folder)
+mackeysremap.exe
 ```
 
-### Specify Keyboard Name
+### Behavior
 
-If auto-detection fails, specify the exact keyboard name:
+- Loads remapping rules from `config.json`
+- Logs to `MacKeysRemap.log` (or screen with `--console`)
+- No tray icon, no window — runs silently in background
+- Press Ctrl+C to exit
 
-```bash
-MacKeysRemap.exe "Apple Internal Keyboard"
+## GUI App (MacKeysRemap.exe)
+
+### Usage
+
+1. Run `MacKeysRemap.exe` as Administrator
+2. Window opens → loads keyboards → auto-starts mapping
+3. Right-click tray icon → **Auto-start** to toggle Task Scheduler
+4. Left-click tray icon → show/hide GUI
+
+### Features
+
+- Visual keyboard selection
+- Key capture (press any key to capture)
+- Per-device remapping
+- Auto-start via Task Scheduler
+- Media key remapping
+
+## Configuration (config.json)
+
+```json
+[
+  {
+    "Keyboard": "Apple",
+    "From": "LAlt",
+    "To": "LWin"
+  },
+  {
+    "Keyboard": "Apple",
+    "From": "LWin",
+    "To": "LAlt"
+  }
+]
 ```
 
-### Find Your Keyboard Name
+| Field | Description |
+|-------|-------------|
+| `Keyboard` | Keyboard name, "All Keyboards", or substring match |
+| `From` | Source key (e.g., "LAlt", "LWin", "F1", "VolumeUp") |
+| `To` | Target key |
 
-Run the app without arguments — it will list all detected keyboards:
+### Available Keys
 
-```
-Available keyboards:
-  - Apple Internal Keyboard (ID: 1)
-  - Logitech USB Keyboard (ID: 2)
-```
+- **Modifiers:** LAlt, RAlt, LWin, RWin, LCtrl, RCtrl, LShift, RShift
+- **Function:** F1-F12
+- **Navigation:** Insert, Delete, Home, End, PageUp, PageDown
+- **Media:** VolumeUp, VolumeDown, VolumeMute, PlayPause, NextTrack, PrevTrack, Stop
+- **Other:** PrintScreen, ScrollLock, Pause, CapsLock, NumLock, Escape, Space, Tab, Enter, Backspace
 
 ## Building from Source
 
 ### Prerequisites
 - [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) or later
 
-### Build
+### Build Non-GUI App
+
 ```bash
-cd mackeys-windows
-dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o publish
+cd mackeysremap
+dotnet publish -c Release -r win-x64 --self-contained true -o publish
 ```
 
-The compiled exe will be in the `publish` folder.
+Output: `publish\mackeysremap.exe`
 
-## Auto-Start on Boot
+### Build GUI App
 
-### Method 1: Task Scheduler
+```bash
+cd mackeysremap\MacKeysRemapGui
+dotnet publish -c Release -r win-x64 --self-contained true -o publish
+```
 
-1. Open Task Scheduler
-2. Create Basic Task
-3. Trigger: "When I log on"
-4. Action: "Start a program"
-5. Program: `C:\path\to\MacKeysRemap.exe`
-6. Check "Run with highest privileges"
+Output: `publish\MacKeysRemap.exe`
 
-### Method 2: Startup Folder
+## Libraries Used
 
-1. Press `Win+R`, type `shell:startup`, press Enter
-2. Create a shortcut to `MacKeysRemap.exe`
-3. Right-click shortcut → Properties → Advanced → Check "Run as administrator"
+| Library | Purpose |
+|---------|---------|
+| **Interception** | Low-level keyboard driver for per-device remapping |
+| **System.Text.Json** | Config file parsing (GUI app) |
+| **System.Drawing** | Icon handling |
+| **Windows Forms** | GUI (GUI app only) |
+
+## Auto-Start (GUI App Only)
+
+The GUI app can create a Task Scheduler task to run on login:
+
+1. Right-click tray icon → **Auto-start**
+2. Task created: `MacKeysRemap` (runs `MacKeysRemap.exe /tray`)
+3. Click again to remove task
 
 ## Troubleshooting
 
-### "Failed to create Interception context"
-- Make sure you installed the Interception driver and rebooted
-- Run `install-interception.exe /install` again as Administrator
+### "Interception driver not found"
+- Install Interception driver (see above)
+- Reboot after installation
 
-### "Could not find internal keyboard"
-- Run the app to list available keyboards
-- Use the exact name as a command line argument
+### "No keyboards found"
+- Make sure you're running as Administrator
+- Check that keyboards are connected
 
 ### Keys not remapping
-- Make sure you're running as Administrator
-- Check that the correct keyboard is detected
-- Try specifying the keyboard name manually
-
-## Uninstallation
-
-1. Stop the app (Ctrl+C or close window)
-2. Open Command Prompt as Administrator
-3. Run:
-   ```
-   install-interception.exe /uninstall
-   ```
-4. Reboot your computer
+- Check `config.json` format
+- Verify keyboard name matches (use "All Keyboards" for testing)
+- Check log file for match messages
 
 ## License
 
